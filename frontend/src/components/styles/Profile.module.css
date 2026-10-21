@@ -1,0 +1,11 @@
+.profileContainer > div{
+    display: flex;
+    gap: 0.2rem;
+    align-items: center;
+}
+
+.profileContainer{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}

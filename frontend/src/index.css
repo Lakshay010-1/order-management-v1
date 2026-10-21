@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
+:root {
+    --color-01: whitesmoke;
+    --color-02: rgb(120, 149, 168);
+    --color-02-dark-01: rgb(64, 81, 92);
+    --color-02-dark-02: rgb(18, 45, 63);
+    --color-02-dark-03: rgb(8, 37, 56);
+    --color-02-light: rgb(90, 149, 188);
+    --color-03: black;
+    --color-04: rgb(167, 239, 255);
+    --color-ongoing: rgb(42, 193, 227);
+    --color-complete: rgb(21, 187, 21);
+    --color-pending: rgb(220, 220, 68);
+
+}
+
+body {
+    margin: 0;
+    font-family: "Lato";
+}
+
+/* .complete-value:hover {
+    background-color: lightgreen !important;
+    color: green !important;
+    border: 2px rgb(0, 82, 0) solid !important;
+}
+
+.ongoing-value:hover {
+    background-color: rgb(184, 227, 237) !important;
+    color: rgb(42, 193, 227) !important;
+    border: 2px rgb(0, 51, 62) solid !important;
+}
+
+.pending-value:hover {
+    background-color: rgb(182, 192, 100) !important;
+    color: rgb(255, 255, 1) !important;
+    border: 2px rgb(86, 86, 0) solid !important;
+} */

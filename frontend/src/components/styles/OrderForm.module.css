@@ -1,0 +1,85 @@
+.container {
+    background-color: wheat;
+    min-height: 100vh;
+}
+
+.orderFormHeader {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.orderFormHeader h2 {
+    margin: 0;
+}
+
+.orderFormHeader button {
+    border: none;
+    border-radius: 10%;
+    height: 2.5rem;
+    width: 2.5rem;
+    background-color: greenyellow;
+}
+
+.orderFormHeader button:hover {
+    background-color: whitesmoke;
+    background-color: green;
+}
+
+.orderFormHeader button:active {
+    background-color: black;
+    color: whitesmoke;
+}
+
+.orderGrid {
+    /* display: grid;
+    grid-template-areas:
+        "a a a a b b b b e e e e"
+        "f f f f f f g g g c c c"; */
+    display: flex;
+    flex-wrap: wrap;
+    /* overflow-x: scroll; */
+    padding: 1rem;
+    gap: 1rem;
+    flex: 1;
+    /* justify-content: space-evenly;   */
+    
+    align-items: start;
+    /* height: 100; */
+}
+
+
+.overviewContainer {
+    display: flex;
+    /* flex-direction: column; */
+    gap: 1rem;
+}
+
+input {
+    text-align: center;
+    border: 1px solid rgba(128, 128, 128, 0.1);
+    field-sizing: content;
+    min-width: 1ch;
+    max-width: 100%;
+    text-align: center;
+}
+
+
+
+input:disabled {
+    border: 1px solid rgba(128, 128, 128, 0.1);
+    background-color: rgba(0, 0, 0, 0.01);
+    /* padding: 0; */
+}
+
+.itemsAndMaterialsContainer{
+    display: flex;
+    gap: 1rem;
+}
+
+.detailsContainer{
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+}

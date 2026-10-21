@@ -1,0 +1,33 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    background-color: lightblue;
+    padding: 1rem;
+}
+
+.headerPage {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+.headerPages {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.companyLogo {
+    height: 6rem;
+}
+
+.headerContentContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content {
+    display: flex;
+    gap: 1rem;
+}

@@ -1,0 +1,122 @@
+.container {
+    min-height: 100vh;
+    /* height: 100vh; */
+    background-color: whitesmoke;
+}
+
+
+.orderForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 0 10rem;
+}
+
+.header {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: flex-start;
+    /* width: 100%; */
+    padding: 1rem 2rem;
+
+}
+
+.backButton {
+    justify-self: flex-start;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: rgb(248, 248, 203);
+    border-radius: 50%;
+    padding: 0.5rem;
+    width: 2%;
+    display: flex;
+    /* transition: background-color 0.5s ease-in; */
+}
+
+.backButton:hover {
+    background-color: rgb(244, 244, 115);
+}
+
+.backButton:active {
+    background-color: rgb(134, 244, 115);
+}
+
+.orderForm button {
+    margin: 5rem 0 0;
+    padding: 1rem;
+    font-size: larger;
+    border-radius: 2%;
+    width: 50%;
+}
+
+.title {
+    text-align: center;
+    margin: 0;
+    padding: 1rem 0;
+    justify-items: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+
+}
+
+.formRows h1 {
+    margin: 0;
+}
+
+.formRows {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: 1rem 5rem;
+}
+
+.formLabel,
+input,
+select,
+option {
+    font-size: 1.5rem;
+}
+
+.orderForm input {
+    border: 0;
+    padding: 0.5rem;
+    width: 50rem;
+    resize: horizontal;
+}
+
+.orderForm input:focus,
+select:focus {
+    background-color: rgba(125, 255, 125, 0.67);
+}
+
+.orderForm option {
+    background-color: white;
+}
+
+.orderForm select,
+.orderForm option {
+    border: 0;
+    padding: 0.5rem;
+
+    /* width: 50rem; */
+}
+
+.formLabel {
+
+    font-weight: bold
+}
+
+/* #bgLightRed,
+#bgLightRed:hover {
+    background-color: rgb(255, 0, 0);
+}
+
+#bgLightYellow {
+    background-color: rgb(255, 255, 0);
+}
+
+#bgLightGreen {
+    background-color: rgb(0, 128, 0); */
+/* } */

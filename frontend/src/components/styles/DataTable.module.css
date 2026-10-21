@@ -1,0 +1,39 @@
+/* .tableContainer{
+    padding: 1rem;
+} */
+
+
+
+.tableCell {
+    padding: 0;
+}
+
+.green {
+    background-color: #B6F500;
+}
+
+
+.actionBtn {
+    border: 0;
+    border-radius: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+
+.addActionBtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 0;
+    width: 100%;
+    height: 100%;
+}
+
+
+
+.red {
+    background-color: red;
+}

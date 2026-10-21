@@ -1,0 +1,17 @@
+.ordersContainer {
+    overflow-x: auto;
+    /* margin-bottom: 1rem 0rem 3rem; */
+    padding:0 1rem;
+    margin: 1rem 0 3rem ;
+
+}
+
+table{
+    text-align: center;
+}
+
+th,
+td {
+    border: 1px black solid;
+    padding: 0.5rem;
+}

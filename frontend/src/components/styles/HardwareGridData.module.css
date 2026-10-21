@@ -1,0 +1,25 @@
+.keyOne {
+    font-size: larger;
+    margin: 0;
+    padding: 0 0.5rem;
+}
+
+.valueOne {
+    text-align: left;
+    font-size: small;
+    color: var(--color-03);
+    
+    field-sizing: content;
+    min-width: 1ch;
+    max-width: 100%;
+    text-align: center;
+}
+
+
+.hardwareDetails {
+    display: grid;
+    grid-auto-flow: column;
+
+    /* display: flex; */
+    gap: 2rem;
+}

@@ -1,0 +1,74 @@
+input:disabled,
+input {
+    border: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1rem;
+}
+
+.editData {
+    background-color: #A8F1FF;
+}
+
+.container {
+    padding: 2rem;
+}
+
+.tableCell {
+    padding: 0
+}
+
+.green {
+    background-color: #B6F500;
+}
+
+.red {
+    background-color: red;
+}
+
+.blue {
+    background-color: #2373F4;
+}
+
+.black {
+    background-color: black;
+}
+
+.gold {
+    background-color: gold;
+}
+
+.addActionBtn {
+    border: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.actionBtn {
+    border: 0;
+    border-radius: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.actionBtnContainer {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+}
+
+.whiteColor {
+    color: white;
+}
+
+.redColor {
+    color: red;
+}
+
+.blackColor {
+    color: black;
+}

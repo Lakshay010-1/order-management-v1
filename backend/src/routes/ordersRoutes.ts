@@ -1,0 +1,31 @@
+import e from "express";
+import {
+  addOrder,
+  deleteOrder,
+  getOrder,
+  getOrders,
+  updateOrder,
+} from "../controllers/ordersController.js";
+import orderItemsRouter from "./orderItemsRouter.js";
+import orderMaterialsRouter from "./orderMaterialsRouter.js";
+import orderPaymentTCsRouter from "./orderPaymentTcRouter.js";
+
+const ordersRouter = e.Router();
+
+ordersRouter.get("/", getOrders);
+
+ordersRouter.get("/:id", getOrder);
+
+ordersRouter.post("/", addOrder);
+
+ordersRouter.put("/:id", updateOrder);
+
+ordersRouter.delete("/:id", deleteOrder);
+
+ordersRouter.use("/:order_id/items", orderItemsRouter);
+
+ordersRouter.use("/:order_id/materials", orderMaterialsRouter);
+
+ordersRouter.use("/:order_id/payment_tcs", orderPaymentTCsRouter);
+
+export default ordersRouter;

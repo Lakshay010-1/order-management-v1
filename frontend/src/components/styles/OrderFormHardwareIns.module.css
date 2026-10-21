@@ -1,0 +1,7 @@
+.hardwareDetails {
+    display: grid;
+    grid-auto-flow: column;
+
+    /* display: flex; */
+    gap: 2rem;
+}

@@ -1,0 +1,30 @@
+footer {
+    font-family: sans-serif;
+    /* width: 100%; */
+    padding: 1rem;
+    text-align: center;
+    background-color: black;
+    color: white;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    /* justify-self: end; */
+}
+
+footer h1 a {
+    text-decoration: none;
+}
+
+
+footer h1 a:hover {
+    color: greenyellow;
+    text-decoration: underline;
+}
+
+footer h1 a:active {
+    color: green;
+}
+
+footer h1 a:visited {
+    color: lightblue;
+}

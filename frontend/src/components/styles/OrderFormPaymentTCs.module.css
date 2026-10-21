@@ -1,0 +1,48 @@
+.paymentstcsDetails {
+    display: grid;
+    grid-auto-flow: row;
+    width: 100%;
+    grid-template-columns: 65% 20% 15%;
+}
+
+
+.keyOne {
+    font-size: larger;
+    margin: 0;
+    padding: 0 0.5rem;
+}
+
+.valueOne {
+    text-align: left;
+    text-align: center;
+    font-size: small;
+    color: var(--color-03);
+    field-sizing: content;
+    min-width: 1ch;
+    max-width: 100%;
+    text-align: center;
+    
+}
+
+.valueOne[type="checkbox"] {
+    width: 40%;
+    display: flex;
+    justify-self: center;
+}
+
+.actionBtn {
+    border: 0;
+}
+
+.green {
+    background-color: #B6F500;
+}
+
+
+.red {
+    background-color: red;
+}
+
+.border1 {
+    border: 1px black solid;
+}

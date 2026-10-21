@@ -1,0 +1,64 @@
+.container {
+    /* height: 100vh; */
+    display: flex;
+    flex-direction: column;
+    /* padding: 1rem; */
+}
+
+.orderOperationsHeader {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.orderGrid {
+    /* display: grid;
+    grid-template-areas:
+        "a a a a b b b b e e e e"
+        "f f f f f f g g g c c c"; */
+    display: flex;
+    flex-wrap: wrap;
+    padding: 1rem;
+    gap: 1rem;
+    flex: 1;
+    justify-content: space-evenly;
+    background-color: white;
+    background-color: rgba(245, 222, 179, 0.3);
+    background-color: wheat;
+}
+
+
+.itemsDetails,
+.materialsDispatchesDetails,
+.materialsDetails {
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(4, auto);
+}
+
+input {
+    text-align: center;
+    border: 1px solid rgba(128, 128, 128, 0.1);
+}
+
+
+
+input:disabled {
+    border: 1px solid rgba(128, 128, 128, 0.1);
+    background-color: rgba(0, 0, 0, 0.01);
+    /* padding: 0; */
+}
+
+.keyOne {
+    font-size: larger;
+}
+
+.valueOne {
+    text-align: left;
+    text-align: center;
+    /* min-width: 0; */
+    /* width: 100%; */
+    /* max-width:fit-content; */
+    font-size: small;
+    color: var(--color-03);
+}
