@@ -6,7 +6,7 @@ import {
   getOrders,
   updateOrder,
 } from "../controllers/ordersController.js";
-import orderItemsRouter from "./orderItemsRouter.js";
+import orderServicesRouter from "./orderServicesRouter.js";
 import orderMaterialsRouter from "./orderMaterialsRouter.js";
 import orderPaymentTCsRouter from "./orderPaymentTcRouter.js";
 
@@ -22,7 +22,7 @@ ordersRouter.put("/:id", updateOrder);
 
 ordersRouter.delete("/:id", deleteOrder);
 
-ordersRouter.use("/:order_id/items", orderItemsRouter);
+ordersRouter.use("/:order_id/services", orderServicesRouter);
 
 ordersRouter.use("/:order_id/materials", orderMaterialsRouter);
 

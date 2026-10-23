@@ -23,7 +23,7 @@ const pool: sql.ConnectionPool = new sql.ConnectionPool(config);
 const connectDB = async () => {
   try {
     await pool.connect();
-    console.log("Database successfully connected.");
+    console.log("Database successfully connected");
   } catch (error) {
     console.log("Database connection failed!");
     throw error;

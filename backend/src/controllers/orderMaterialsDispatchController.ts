@@ -4,7 +4,7 @@ import {
   insertOrderMaterialDispatch,
   deleteOrderMaterialDispatch,
   fetchOrderMaterialsDispatch,
-} from "../services/orderMaterialService.js";
+} from "../services/orderMaterialsDispatchesServices.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { validateId } from "../utils/validateId.js";
 import { validateRecordExistance } from "../utils/validateExistance.js";
@@ -130,13 +130,14 @@ const addOrderMaterialDispatch = async (req: Request, res: Response) => {
   const order_id = Number(req.params.order_id);
   const bodySchema = z.object({
     quantity: z.number(),
-    date: z.coerce.date(),
+    dispatch_date: z.coerce.date(),
+    confirmation_date: z.coerce.date().optional(),
+    delivered_by: z.number(),
   });
   const paramsValid = bodySchema.safeParse(req.body);
   if (!paramsValid.success) {
     return apiResponse(res, 400, "Missing required paramters");
   }
-  const { quantity, date } = paramsValid.data;
   try {
     const { isIdValid: isIdOrderValid, response: validIdOrderResponse } =
       validateId(order_id, "Order", res);
@@ -168,11 +169,10 @@ const addOrderMaterialDispatch = async (req: Request, res: Response) => {
       return orderMaterialRecordResponse;
     }
 
-    const response = await insertOrderMaterialDispatch(
-      material_id,
-      quantity,
-      date,
-    );
+    const response = await insertOrderMaterialDispatch(material_id, {
+      ...paramsValid.data,
+      confirmation_date: paramsValid.data.confirmation_date ?? undefined,
+    });
     if (!response) {
       return apiResponse(res, 400, "Failed to insert order material dispatch");
     }
@@ -193,13 +193,14 @@ const updateOrderMaterialDispatch = async (req: Request, res: Response) => {
   const order_id = Number(req.params.order_id);
   const bodySchema = z.object({
     quantity: z.number(),
-    date: z.coerce.date(),
+    dispatch_date: z.coerce.date(),
+    confirmation_date: z.coerce.date().optional(),
+    delivered_by: z.number(),
   });
   const paramsValid = bodySchema.safeParse(req.body);
   if (!paramsValid.success) {
     return apiResponse(res, 400, "Missing required paramters");
   }
-  const { quantity, date } = paramsValid.data;
   try {
     const { isIdValid: isIdOrderValid, response: validIdOrderResponse } =
       validateId(order_id, "Order", res);
@@ -252,11 +253,10 @@ const updateOrderMaterialDispatch = async (req: Request, res: Response) => {
     if (!orderMaterialDispatchSuccess) {
       return orderMaterialDispatchRecordResponse;
     }
-    const response = await putOrderMaterialDispatch(
-      material_dispatch_id,
-      quantity,
-      date,
-    );
+    const response = await putOrderMaterialDispatch(material_dispatch_id, {
+      ...paramsValid.data,
+      confirmation_date: paramsValid.data.confirmation_date ?? undefined,
+    });
     if (!response) {
       return apiResponse(res, 400, "Failed to update order material dispatch");
     }

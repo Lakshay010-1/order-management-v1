@@ -1,6 +1,6 @@
 export interface PaymentTC {
-  id: number;
+  id?: number;
   term: string;
   fulfilled: boolean;
-  created_at: Date;
+  created_at?: Date;
 }

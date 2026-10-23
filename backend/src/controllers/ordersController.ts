@@ -43,9 +43,14 @@ const getOrder = async (req: Request, res: Response) => {
 const addOrder = async (req: Request, res: Response) => {
   const bodySchema = z.object({
     po_date: z.coerce.date(),
+    po_number: z.number(),
+    po_type_id: z.number(),
+    total_services: z.number().optional(),
     hardware_installation_date: z.coerce.date(),
+    hardware_installation_expected_date: z.coerce.date(),
     hardware_installation_status_id: z.number(),
     software_installation_date: z.coerce.date(),
+    software_installation_expected_date: z.coerce.date(),
     software_installation_status_id: z.number(),
     status_id: z.number(),
     party_id: z.number(),
@@ -53,14 +58,7 @@ const addOrder = async (req: Request, res: Response) => {
       z.object({
         item_id: z.number(),
         quantity: z.number(),
-        date: z.coerce.date(),
-      }),
-    ),
-    items: z.array(
-      z.object({
-        item_id: z.number(),
-        quantity: z.number(),
-        date: z.coerce.date(),
+        order_date: z.coerce.date(),
       }),
     ),
     payment_tcs: z.array(
@@ -75,7 +73,7 @@ const addOrder = async (req: Request, res: Response) => {
     return apiResponse(res, 400, "Invalid request parameters");
   }
   try {
-    const response = await insertOrder(paramsValid.data);
+    const response = await insertOrder(req.body);
     if (!response) {
       return apiResponse(res, 400, "Failed to add order");
     }
@@ -94,6 +92,11 @@ const updateOrder = async (req: Request, res: Response) => {
     software_installation_status_id: z.number(),
     status_id: z.number(),
     party_id: z.number(),
+    po_number: z.number(),
+    po_type_id: z.number(),
+    total_services: z.number(),
+    hardware_installation_expected_date: z.coerce.date(),
+    software_installation_expected_date: z.coerce.date(),
   });
   const { id } = req.params;
   if (!validateNum(id)) {

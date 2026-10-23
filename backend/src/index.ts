@@ -22,7 +22,7 @@ app.use("/", mainRouter);
 try {
   await connectDB();
   app.listen(PORT, () => {
-    console.log("Application started successfully.");
+    console.log("Application started successfully");
   });
 } catch (error) {
   console.log("Connection failed!");

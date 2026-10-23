@@ -89,13 +89,13 @@ const addOrderMaterial = async (req: Request, res: Response) => {
   const bodySchema = z.object({
     item_id: z.number(),
     quantity: z.number(),
-    date: z.coerce.date(),
+    order_date: z.coerce.date(),
+    purchase_date: z.coerce.date().optional(),
   });
   const paramsValid = bodySchema.safeParse(req.body);
   if (!paramsValid.success) {
     return apiResponse(res, 400, "Missing required paramters");
   }
-  const { item_id, quantity, date } = paramsValid.data;
   try {
     const { isIdValid, response: validIdResponse } = validateId(
       order_id,
@@ -110,12 +110,10 @@ const addOrderMaterial = async (req: Request, res: Response) => {
     if (!orderSuccess) {
       return orderRecordResponse;
     }
-    const response = await insertOrderMaterial(
-      order_id,
-      item_id,
-      quantity,
-      date,
-    );
+    const response = await insertOrderMaterial(order_id, {
+      ...req.body,
+      purchase_date: req.body.purchase_date ?? undefined,
+    });
     if (!response) {
       return apiResponse(res, 400, "Failed to add order material");
     }
@@ -130,13 +128,14 @@ const updateOrderMaterial = async (req: Request, res: Response) => {
   const order_material_id = Number(req.params.material_id);
   const bodySchema = z.object({
     quantity: z.number(),
-    date: z.coerce.date(),
+    order_date: z.coerce.date(),
+    purchase_date: z.coerce.date(),
+    deliver_date: z.coerce.date(),
   });
   const paramsValid = bodySchema.safeParse(req.body);
   if (!paramsValid.success) {
     return apiResponse(res, 400, "Missing required paramters");
   }
-  const { quantity, date } = paramsValid.data;
   try {
     const { isIdValid: isIdOrderValid, response: validIdOrderResponse } =
       validateId(order_id, "Order", res);
@@ -167,7 +166,10 @@ const updateOrderMaterial = async (req: Request, res: Response) => {
     if (!orderMaterialSuccess) {
       return orderMaterialRecordResponse;
     }
-    const response = await putOrderMaterial(order_material_id, quantity, date);
+    const response = await putOrderMaterial(
+      order_material_id,
+      paramsValid.data,
+    );
     if (!response) {
       return apiResponse(res, 400, "Failed to update order material");
     }

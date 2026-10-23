@@ -1,6 +1,5 @@
 import { pool } from "../config/db.js";
-import type { Order } from "../types/Order.js";
-import { fetchOrderItems, insertOrderItem } from "./orderItemService.js";
+import type { NewOrder, Order } from "../types/Order.js";
 import {
   fetchOrderMaterials,
   insertOrderMaterial,
@@ -9,6 +8,7 @@ import {
   fetchOrderPaymentTCs,
   insertOrderPaymentTC,
 } from "./orderPaymentTCServices.js";
+import { fetchOrderServices } from "./orderServicesServices.js";
 
 const orderExists: (order_id: number) => Promise<boolean> = async (
   order_id,
@@ -23,19 +23,24 @@ const orderExists: (order_id: number) => Promise<boolean> = async (
 
 const fetchOrders: () => Promise<Array<Order> | undefined> = async () => {
   const ordersResponse = await pool.request().query(
-    `SELECT o.id,
+    ` SELECT o.id,
+        o.po_date,
+        o.po_number,
+        pt.type as po_type,
         o.party_id,
+        p.party as party,
+        o.total_services,
         o.status as status_id,
+        s.status, 
         o.software_installation_status as software_installation_status_id, 
         o.hardware_installation_status as hardware_installation_status_id, 
-        o.po_date,
-        o.hardware_installation_date, 
         h_s.status as hardware_installation_status, 
-        o.software_installation_date, 
         s_s.status as software_installation_status, 
-        s.status, 
-        o.created_at, 
-        p.party as party
+        o.hardware_installation_date, 
+        o.software_installation_date, 
+        o.hardware_installation_expected_date, 
+        o.software_installation_expected_date, 
+        o.created_at 
         FROM orders as o 
         JOIN statuses as s_s 
         ON o.software_installation_status=s_s.id
@@ -44,7 +49,9 @@ const fetchOrders: () => Promise<Array<Order> | undefined> = async () => {
         JOIN statuses as s 
         ON o.status=s.id
         JOIN parties as p
-        ON o.party_id=p.id        
+        ON o.party_id=p.id     
+        JOIN po_types as pt
+        ON o.po_type_id=pt.id  
         `,
   );
   const { recordset } = ordersResponse;
@@ -54,9 +61,9 @@ const fetchOrders: () => Promise<Array<Order> | undefined> = async () => {
   for (let i = 0; i < recordset.length; i++) {
     const element = recordset[i];
     const elementId = element["id"];
-    element["items"] = await fetchOrderItems(elementId);
     element["materials"] = await fetchOrderMaterials(elementId);
-    element["payment_tc"] = await fetchOrderPaymentTCs(elementId);
+    element["payment_tcs"] = await fetchOrderPaymentTCs(elementId);
+    element["services"] = await fetchOrderServices(elementId);
   }
   return recordset;
 };
@@ -64,16 +71,25 @@ const fetchOrders: () => Promise<Array<Order> | undefined> = async () => {
 const fetchOrder: (id: number) => Promise<Order | undefined> = async (
   id: number,
 ) => {
-  const response = await pool.request().input("id", id).query(`
+  const response = await pool.request().input("order_id", id).query(`
     SELECT o.id,
         o.po_date,
-        o.hardware_installation_date, 
-        h_s.status as hardware_installation_status, 
-        o.software_installation_date, 
-        s_s.status as software_installation_status, 
+        o.po_number,
+        pt.type as po_type,
+        o.party_id,
+        p.party as party,
+        o.total_services,
+        o.status as status_id,
         s.status, 
-        o.created_at, 
-        p.party as party
+        o.software_installation_status as software_installation_status_id, 
+        o.hardware_installation_status as hardware_installation_status_id, 
+        h_s.status as hardware_installation_status, 
+        s_s.status as software_installation_status, 
+        o.hardware_installation_date, 
+        o.software_installation_date, 
+        o.hardware_installation_expected_date, 
+        o.software_installation_expected_date, 
+        o.created_at 
         FROM orders as o 
         JOIN statuses as s_s 
         ON o.software_installation_status=s_s.id
@@ -82,8 +98,10 @@ const fetchOrder: (id: number) => Promise<Order | undefined> = async (
         JOIN statuses as s 
         ON o.status=s.id
         JOIN parties as p
-        ON o.party_id=p.id
-        WHERE o.id=@id
+        ON o.party_id=p.id     
+        JOIN po_types as pt
+        ON o.po_type_id=pt.id   
+        WHERE o.id=@order_id;
         `);
   const { recordset } = response;
   if (!recordset[0]) {
@@ -91,9 +109,9 @@ const fetchOrder: (id: number) => Promise<Order | undefined> = async (
   }
   const element = recordset[0];
   const elementId = element["id"];
-  element["items"] = await fetchOrderItems(elementId);
   element["materials"] = await fetchOrderMaterials(elementId);
-  element["payment_tc"] = await fetchOrderPaymentTCs(elementId);
+  element["payment_tcs"] = await fetchOrderPaymentTCs(elementId);
+  element["servies"] = await fetchOrderServices(elementId);
   return element;
 };
 
@@ -106,20 +124,16 @@ const removeOrder: (id: number) => Promise<boolean> = async (id: number) => {
   return (rowsAffected[0] ?? 0) > 0;
 };
 
-const insertOrder: (details: {
-  po_date: Date;
-  hardware_installation_date: Date;
-  software_installation_date: Date;
-  software_installation_status_id: number;
-  hardware_installation_status_id: number;
-  status_id: number;
-  party_id: number;
-  materials: Array<{ item_id: number; quantity: number; date: Date }>;
-  items: Array<{ item_id: number; quantity: number; date: Date }>;
-  payment_tcs: Array<{ term: string; fulfilled: boolean }>;
-}) => Promise<Order | undefined> = async (details) => {
+const insertOrder: (details: NewOrder) => Promise<Order | undefined> = async (
+  details,
+) => {
   const {
     po_date,
+    po_number,
+    po_type_id,
+    total_services,
+    hardware_installation_expected_date,
+    software_installation_expected_date,
     hardware_installation_date,
     hardware_installation_status_id,
     software_installation_date,
@@ -127,12 +141,22 @@ const insertOrder: (details: {
     status_id,
     party_id,
     payment_tcs,
-    items,
     materials,
   } = details;
   const orderResponse = await pool
     .request()
     .input("po_date", po_date)
+    .input("po_number", po_number)
+    .input("po_type_id", po_type_id)
+    .input("total_services", total_services)
+    .input(
+      "hardware_installation_expected_date",
+      hardware_installation_expected_date,
+    )
+    .input(
+      "software_installation_expected_date",
+      software_installation_expected_date,
+    )
     .input("hardware_installation_date", hardware_installation_date)
     .input("hardware_installation_status", hardware_installation_status_id)
     .input("software_installation_date", software_installation_date)
@@ -140,9 +164,20 @@ const insertOrder: (details: {
     .input("status", status_id)
     .input("party_id", party_id)
     .query(
-      `INSERT INTO orders (po_date, hardware_installation_date, hardware_installation_status, software_installation_date, software_installation_status, status, party_id) 
+      `INSERT INTO orders 
+      (
+      po_date, hardware_installation_date, hardware_installation_status, 
+      software_installation_date, software_installation_status, status, party_id,
+      po_number, po_type_id, total_services, 
+      hardware_installation_expected_date, software_installation_expected_date
+      ) 
       OUTPUT INSERTED.id
-      VALUES (@po_date, @hardware_installation_date, @hardware_installation_status, @software_installation_date, @software_installation_status, @status, @party_id)`,
+      VALUES (
+      @po_date, @hardware_installation_date, @hardware_installation_status, 
+      @software_installation_date, @software_installation_status, @status, @party_id,
+      @po_number, @po_type_id, @total_services,
+      @hardware_installation_expected_date, @software_installation_expected_date
+      )`,
     );
   const { recordset } = orderResponse;
   if (!recordset[0]) {
@@ -153,26 +188,11 @@ const insertOrder: (details: {
   for (let i = 0; i < payment_tcs.length; i++) {
     const element = payment_tcs[i]!;
     const { term, fulfilled } = element;
-    const response = await insertOrderPaymentTC(
-      order_id,
-      term,
-      fulfilled ? 1 : 0,
-    );
-  }
-  for (let i = 0; i < items.length; i++) {
-    const element = items[i]!;
-    const { item_id, quantity, date } = element;
-    const response = await insertOrderItem(order_id, item_id, quantity, date);
+    await insertOrderPaymentTC(order_id, term, fulfilled ? 1 : 0);
   }
   for (let i = 0; i < materials.length; i++) {
     const element = materials[i]!;
-    const { item_id, quantity, date } = element;
-    const response = await insertOrderMaterial(
-      order_id,
-      item_id,
-      quantity,
-      date,
-    );
+    await insertOrderMaterial(order_id, element);
   }
 
   const order = await fetchOrder(order_id);
@@ -181,20 +201,17 @@ const insertOrder: (details: {
 
 const putOrder: (
   order_id: number,
-  details: {
-    po_date: Date;
-    hardware_installation_date: Date;
-    software_installation_date: Date;
-    software_installation_status_id: number;
-    hardware_installation_status_id: number;
-    status_id: number;
-    party_id: number;
-  },
+  details: Partial<NewOrder>,
 ) => Promise<boolean> = async (order_id, details) => {
   const {
     po_date,
+    po_number,
+    po_type_id,
+    total_services,
+    hardware_installation_expected_date,
     hardware_installation_date,
     hardware_installation_status_id,
+    software_installation_expected_date,
     software_installation_date,
     software_installation_status_id,
     status_id,
@@ -203,6 +220,17 @@ const putOrder: (
   const response = await pool
     .request()
     .input("order_id", order_id)
+    .input("po_number", po_number)
+    .input("po_type_id", po_type_id)
+    .input("total_services", total_services)
+    .input(
+      "hardware_installation_expected_date",
+      hardware_installation_expected_date,
+    )
+    .input(
+      "software_installation_expected_date",
+      software_installation_expected_date,
+    )
     .input("po_date", po_date)
     .input("hardware_installation_date", hardware_installation_date)
     .input("hardware_installation_status", hardware_installation_status_id)
@@ -211,14 +239,19 @@ const putOrder: (
     .input("status", status_id)
     .input("party_id", party_id)
     .query(
-      `UPDATE orders 
-      SET
+      `UPDATE orders SET
       po_date=@po_date, 
       hardware_installation_date=@hardware_installation_date, 
       hardware_installation_status=@hardware_installation_status, 
       software_installation_date=@software_installation_date, 
       software_installation_status=@software_installation_status, 
-      status=@status, party_id=@party_id WHERE id=@order_id`,
+      status=@status, party_id=@party_id,
+      po_number=@po_number, po_type_id=@po_type_id,
+      total_services=@total_services,
+      hardware_installation_expected_date=@hardware_installation_expected_date,
+      software_installation_expected_date=@software_installation_expected_date
+      WHERE id=@order_id
+      `,
     );
   const { rowsAffected } = response;
   return (rowsAffected[0] ?? 0) > 0;
