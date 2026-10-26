@@ -27,6 +27,7 @@ const fetchOrders: () => Promise<Array<Order> | undefined> = async () => {
         o.po_date,
         o.po_number,
         pt.type as po_type,
+        o.po_type_id,
         o.party_id,
         p.party as party,
         o.total_services,
@@ -75,6 +76,7 @@ const fetchOrder: (id: number) => Promise<Order | undefined> = async (
     SELECT o.id,
         o.po_date,
         o.po_number,
+        o.po_type_id,
         pt.type as po_type,
         o.party_id,
         p.party as party,
@@ -111,7 +113,7 @@ const fetchOrder: (id: number) => Promise<Order | undefined> = async (
   const elementId = element["id"];
   element["materials"] = await fetchOrderMaterials(elementId);
   element["payment_tcs"] = await fetchOrderPaymentTCs(elementId);
-  element["servies"] = await fetchOrderServices(elementId);
+  element["services"] = await fetchOrderServices(elementId);
   return element;
 };
 

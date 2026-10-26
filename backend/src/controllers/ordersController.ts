@@ -46,10 +46,10 @@ const addOrder = async (req: Request, res: Response) => {
     po_number: z.number(),
     po_type_id: z.number(),
     total_services: z.number().optional(),
-    hardware_installation_date: z.coerce.date(),
+    hardware_installation_date: z.coerce.date().optional(),
     hardware_installation_expected_date: z.coerce.date(),
     hardware_installation_status_id: z.number(),
-    software_installation_date: z.coerce.date(),
+    software_installation_date: z.coerce.date().optional(),
     software_installation_expected_date: z.coerce.date(),
     software_installation_status_id: z.number(),
     status_id: z.number(),
@@ -73,7 +73,14 @@ const addOrder = async (req: Request, res: Response) => {
     return apiResponse(res, 400, "Invalid request parameters");
   }
   try {
-    const response = await insertOrder(req.body);
+    const response = await insertOrder({
+      ...paramsValid.data,
+      total_services: paramsValid.data.total_services ?? undefined,
+      hardware_installation_date:
+        paramsValid.data.hardware_installation_date ?? undefined,
+      software_installation_date:
+        paramsValid.data.software_installation_date ?? undefined,
+    });
     if (!response) {
       return apiResponse(res, 400, "Failed to add order");
     }
@@ -94,7 +101,7 @@ const updateOrder = async (req: Request, res: Response) => {
     party_id: z.number(),
     po_number: z.number(),
     po_type_id: z.number(),
-    total_services: z.number(),
+    total_services: z.number().optional(),
     hardware_installation_expected_date: z.coerce.date(),
     software_installation_expected_date: z.coerce.date(),
   });
