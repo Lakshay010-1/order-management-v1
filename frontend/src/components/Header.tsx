@@ -9,12 +9,17 @@ import { useAppSelector } from "../store/hooks";
 import logo from "../assets/images/logo.png";
 
 export default function Header() {
-  const { headerContent } = useAppSelector((state) => state.header);
+  const { headerContent, userAuthStatus } = useAppSelector(
+    (state) => state.header,
+  );
+  const { is_verified } = useAppSelector((state) => state.auth);
 
   return (
     <header className={styles.header}>
       <div className={styles.content}>
-        <img src={logo} alt="Logo Image" className={styles.companyLogo} />
+        <NavLink to="/">
+          <img src={logo} alt="Logo Image" className={styles.companyLogo} />
+        </NavLink>
         <div className={styles.headerContentContainer}>
           {headerContent == "Orders" ||
           headerContent == "Parties" ||
@@ -25,27 +30,31 @@ export default function Header() {
           )}
         </div>
       </div>
-      <div className={styles.headerPages}>
-        <NavLink to="/orders">
-          <div className={styles.headerPage}>
-            <BackupTableTwoToneIcon />
-            <h3>Orders</h3>
-          </div>
-        </NavLink>
-        <NavLink to="/parties">
-          <div className={styles.headerPage}>
-            <BusinessIcon />
-            <h3>Parties</h3>
-          </div>
-        </NavLink>
-        <NavLink to="/items">
-          <div className={styles.headerPage}>
-            <BarcodeReaderIcon />
-            <h3>Items</h3>
-          </div>
-        </NavLink>
-        <Profile />
-      </div>
+      {is_verified ? (
+        <div className={styles.headerPages}>
+          <NavLink to="/orders">
+            <div className={styles.headerPage}>
+              <BackupTableTwoToneIcon />
+              <h3>Orders</h3>
+            </div>
+          </NavLink>
+          <NavLink to="/parties">
+            <div className={styles.headerPage}>
+              <BusinessIcon />
+              <h3>Parties</h3>
+            </div>
+          </NavLink>
+          <NavLink to="/items">
+            <div className={styles.headerPage}>
+              <BarcodeReaderIcon />
+              <h3>Items</h3>
+            </div>
+          </NavLink>
+          <Profile />
+        </div>
+      ) : (
+        <h1>{!userAuthStatus ? "Register" : "Login"}</h1>
+      )}
     </header>
   );
 }

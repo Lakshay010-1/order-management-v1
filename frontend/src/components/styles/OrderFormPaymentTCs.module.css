@@ -1,7 +1,13 @@
+.container {
+    height: 23rem;
+    padding-right: 0.5rem;
+    overflow-y: scroll;
+
+}
+
 .paymentstcsDetails {
     display: grid;
     grid-auto-flow: row;
-    width: 100%;
     grid-template-columns: 65% 20% 15%;
 }
 
@@ -21,7 +27,7 @@
     min-width: 1ch;
     max-width: 100%;
     text-align: center;
-    
+
 }
 
 .valueOne[type="checkbox"] {

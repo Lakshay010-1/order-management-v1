@@ -1,4 +1,4 @@
-import type { Item } from "../types/Item";
+import type { Item } from "../types/Item.ts";
 import { API_LINK } from "./URLs";
 import { deleteMethodCall } from "./method_calls/DeleteCall";
 import { getMethodCall } from "./method_calls/GetCall";

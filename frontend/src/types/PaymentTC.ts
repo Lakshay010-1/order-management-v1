@@ -4,3 +4,8 @@ export interface PaymentTC {
   fulfilled: boolean;
   created_at: Date;
 }
+
+export interface NewOrderPaymentTC {
+  term: string;
+  fulfilled: boolean;
+}

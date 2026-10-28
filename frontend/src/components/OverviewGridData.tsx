@@ -6,31 +6,30 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchParties } from "../store/slices/partySlice";
 import { fetchStatuses } from "../store/slices/statusSlice";
 
-interface DataFormat {
-  key: string;
-  name: string;
-}
-
 interface record {
   id: number;
   value: string;
 }
 
-const overviewData: Array<DataFormat> = [
-  { name: "Party", key: "party" },
-  { name: "PO Date", key: "po_date" },
-  { name: "Status", key: "status" },
+const overviewData: Array<Record<string, string | boolean>> = [
+  { name: "Party", key: "party", type: "select", required: true },
+  { name: "PO Date", key: "po_date", type: "date", required: true },
+  { name: "PO Number", key: "po_number", type: "number", required: true },
+  { name: "PO Type", key: "po_type", type: "select", required: true },
+  { name: "Status", key: "status", type: "select", required: true },
 ];
 export default function OverviewGridData({
   order,
   updateOrder,
   editMode,
   saveMode,
+  formatDate,
 }: {
   order: Order;
   updateOrder: (val: any) => void;
   editMode: boolean;
   saveMode: boolean;
+  formatDate: (val: any) => string;
 }) {
   const dispatch = useAppDispatch();
   const { parties, initialized: partiesInitialized } = useAppSelector(
@@ -89,7 +88,7 @@ export default function OverviewGridData({
   return order ? (
     <div
       style={{
-        gridTemplateColumns: `repeat(${overviewData.length},auto)`,
+        gridTemplateRows: `repeat(${overviewData.length + 1},auto)`,
       }}
       className={styles.overviewDetails}
     >
@@ -112,6 +111,7 @@ export default function OverviewGridData({
           <React.Fragment key={idx}>
             <p className={styles.keyOne} key={data.key + "p"}>
               {data.name}
+              <span className="text-red-600">{data?.required && "*"}</span>
             </p>
             <p>:</p>
             {data.key == "party" ? (
@@ -142,7 +142,11 @@ export default function OverviewGridData({
                 id={data.key}
                 name={data.key}
                 type={isDate ? "date" : "text"}
-                value={order[data.key]}
+                value={
+                  data.type == "date"
+                    ? formatDate(order[data.key])
+                    : order[data.key]
+                }
                 onChange={(e) =>
                   updateOrder((prev) => {
                     return {

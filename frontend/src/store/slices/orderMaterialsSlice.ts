@@ -3,14 +3,13 @@ import {
   createSlice,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import type { Material } from "../../types/Material";
+import type { Material, NewMaterial } from "../../types/Material";
 import {
   addOrderMaterial,
   deleteOrderMaterial,
   getOrderMaterials,
   putOrderMaterial,
 } from "../../api/OrderMaterialApi";
-import type { NewOrderMaterial } from "../../types/NewOrderMaterial";
 import { addData, deleteData, updateData } from "../../utils/handleArrayData";
 
 interface orderMaterialsState {
@@ -41,7 +40,7 @@ export const insertOrderMaterial = createAsyncThunk(
     details,
   }: {
     order_id: number;
-    details: NewOrderMaterial;
+    details: NewMaterial;
   }) => {
     return await addOrderMaterial(order_id, details);
   },
@@ -56,7 +55,7 @@ export const updateOrderMaterial = createAsyncThunk(
   }: {
     order_id: number;
     material_id: number;
-    details: { quantity: number; date: Date };
+    details:NewMaterial;
   }) => {
     return await putOrderMaterial(order_id, material_id, details);
   },

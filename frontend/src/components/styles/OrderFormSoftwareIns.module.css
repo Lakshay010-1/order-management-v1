@@ -1,9 +1,10 @@
 .softwareDetails {
     display: grid;
-    /* grid-template-rows: repeat(4, 1fr); */
+    grid-template-rows: repeat(2, max-content);
     grid-auto-flow: column;
     /* display: flex;
     flex-direction: column; */
     gap: 2rem;
+    
 }
 

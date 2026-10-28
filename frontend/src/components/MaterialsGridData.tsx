@@ -17,16 +17,20 @@ import {
 import Loader from "./Loader";
 
 const materialsKeys = [
-  { name: "Id", type: "number" },
-  { name: "Item", type: "text" },
-  { name: "Quantity", type: "text" },
-  { name: "Date", type: "date" },
+  { name: "Id", type: "number", key: "id" },
+  { name: "Item", type: "text", key: "item", required: true },
+  { name: "Quantity", type: "text", key: "quantity", required: true },
+  { name: "Order Date", type: "date", key: "order_date", required: true },
+  { name: "Purchase Date", type: "date", key: "purchase_date" },
+  { name: "Deliver Date", type: "date", key: "deliver_date" },
 ];
 
 const addDataInitialState = {
   material: { id: -1, value: "" },
-  quantity: 0,
-  date: new Date().toISOString().split("T")[0],
+  quantity: "",
+  order_date: "",
+  purchase_date: "",
+  deliver_date: "",
 };
 
 export default function MaterialsGridData({
@@ -57,8 +61,7 @@ export default function MaterialsGridData({
   const [add, setAdd] = useState<boolean>(false);
   const [addData, setAddData] = useState(addDataInitialState);
 
-  const [quantityError, setQuantityError] = useState(false);
-  const [materialError, setMaterialError] = useState(false);
+  const [error, setError] = useState(false);
 
   const [itemOptions, setItemOptions] = useState<
     Array<{ id: number; value: string }>
@@ -80,22 +83,28 @@ export default function MaterialsGridData({
   }
 
   function handleAddMaterial() {
-    const { material, date, quantity } = addData;
-    if (quantity == 0 || material.value == "") {
-      setQuantityError(quantity == 0);
-      setMaterialError(material.value == "");
+    const { material, order_date, purchase_date, deliver_date, quantity } =
+      addData;
+    if (Number(quantity) == 0 || material.value == "" || !order_date) {
+      setError(true);
       return;
     }
-    dispatch(
-      insertOrderMaterial({
-        order_id: order.id,
-        details: {
-          item_id: material.id,
-          date: new Date(date).toISOString().split("T")[0],
-          quantity: Number(quantity),
-        },
-      }),
-    );
+    setError(false);
+    const newOrderMaterial = {
+      order_id: order.id,
+      details: {
+        item_id: material.id,
+        order_date: new Date(order_date),
+        quantity: Number(quantity),
+      },
+    };
+    if (purchase_date) {
+      newOrderMaterial["details"]["purchase_date"] = new Date(purchase_date);
+    }
+    if (purchase_date) {
+      newOrderMaterial["details"]["deliver_date"] = new Date(deliver_date);
+    }
+    dispatch(insertOrderMaterial(newOrderMaterial));
     setAddData(addDataInitialState);
     setAdd(false);
   }
@@ -113,7 +122,9 @@ export default function MaterialsGridData({
             material_id: oMaterial.id,
             details: {
               quantity: Number(oMaterial.quantity),
-              date: new Date(oMaterial.date).toISOString().split("T")[0],
+              order_date: oMaterial.order_date,
+              purchase_date: oMaterial.purchase_date,
+              deliver_date: oMaterial.deliver_date,
             },
           }),
         );
@@ -193,6 +204,7 @@ export default function MaterialsGridData({
       {materialsKeys.map((key) => (
         <p className={styles.keyOne} key={key.name}>
           {key.name}
+          <span className="text-red-600">{key?.required && "*"}</span>
         </p>
       ))}
       <button
@@ -211,22 +223,30 @@ export default function MaterialsGridData({
                   options={itemOptions}
                   selectedOption={addData.material}
                   handleOptionChange={handleItemOptionChange}
+                  required={error}
                 />
               );
             }
             return (
               <input
+                style={
+                  error && key?.required
+                    ? {
+                        border: "1px solid red",
+                      }
+                    : {}
+                }
                 disabled={key.name == "Id"}
                 onChange={(e) =>
                   setAddData((prev) => {
                     return {
                       ...prev,
-                      [key.name.toLowerCase()]: e.target.value,
+                      [key.key]: e.target.value,
                     };
                   })
                 }
-                value={addData[key.name.toLowerCase()]}
-                type={key.name.toLowerCase() === "date" ? "date" : "number"}
+                value={addData[key.key]}
+                type={key.type === "date" ? "date" : "number"}
                 className={styles.valueOne}
               />
             );
@@ -247,7 +267,7 @@ export default function MaterialsGridData({
                 key={idx}
                 disabled={!editMode || key.name == "Id" || key.name == "Item"}
                 type={key.type}
-                name={key.name.toLowerCase()}
+                name={key.key}
                 className={styles.valueOne}
                 onChange={(e) =>
                   setOrderMaterialsData((prev) => {
@@ -255,7 +275,7 @@ export default function MaterialsGridData({
                       if (mat.id === material.id) {
                         return {
                           ...mat,
-                          [key.name.toLowerCase()]: e.target.value,
+                          [key.key]: e.target.value,
                         };
                       }
                       return mat;
@@ -265,8 +285,8 @@ export default function MaterialsGridData({
                 }
                 value={
                   key.type == "date"
-                    ? formatDate(material[key.name.toLowerCase()])
-                    : material[key.name.toLowerCase()]
+                    ? formatDate(material[key.key])
+                    : material[key.key]
                 }
               />
             ))}

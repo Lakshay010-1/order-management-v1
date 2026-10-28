@@ -1,7 +1,7 @@
 .header {
     display: flex;
     justify-content: space-between;
-    background-color: lightblue;
+    background-color: rgb(175, 194, 223);
     padding: 1rem;
 }
 
@@ -30,4 +30,13 @@
 .content {
     display: flex;
     gap: 1rem;
+}
+
+.header a {
+    color: black;
+}
+
+
+.header a:hover {
+    text-decoration: none;
 }

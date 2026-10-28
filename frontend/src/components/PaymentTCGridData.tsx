@@ -14,9 +14,9 @@ import {
 } from "../store/slices/orderPaymentTCsSlice";
 
 const paymentTCkeys = [
-  { name: "Id", type: "number" },
-  { name: "Term", type: "text" },
-  { name: "Fulfilled", type: "checkbox" },
+  { name: "Id", type: "number", key: "id" },
+  { name: "Term", type: "text", key: "term", required: true },
+  { name: "Fulfilled", type: "checkbox", key: "fulfilled" },
 ];
 
 const addDataInitialState = {
@@ -44,7 +44,7 @@ export default function PaymentTCGridData({
   const [add, setAdd] = useState<boolean>(false);
   const [addData, setAddData] = useState(addDataInitialState);
 
-  const [termError, setTermError] = useState(false);
+  const [error, setError] = useState(false);
 
   const [tempPaymentTCsData, setTempPaymentTCsData] = useState([]);
   const [orderPaymentTCsData, setOrderPaymentTCsData] = useState([]);
@@ -52,9 +52,10 @@ export default function PaymentTCGridData({
   function handleAddPaymentTC() {
     const { term, fulfilled } = addData;
     if (term == "") {
-      setTermError(term == "");
+      setError(true);
       return;
     }
+    setError(false);
     dispatch(
       insertOrderPaymentTC({
         order_id: order.id,
@@ -132,6 +133,7 @@ export default function PaymentTCGridData({
       {paymentTCkeys.map((key) => (
         <p className={styles.keyOne} key={key.name}>
           {key.name}
+          <span className="text-red-600">{key?.required && "*"}</span>
         </p>
       ))}
       <button
@@ -151,6 +153,13 @@ export default function PaymentTCGridData({
             //     : { value: addData[keyName] };
             return (
               <input
+                style={
+                  error && key?.required
+                    ? {
+                        border: "1px solid red",
+                      }
+                    : {}
+                }
                 key={idx}
                 disabled={key.name == "Id"}
                 onChange={(e) =>
@@ -187,7 +196,7 @@ export default function PaymentTCGridData({
               const value =
                 key.type === "checkbox"
                   ? { checked: p_tc[keyName] === true }
-                  : { value: p_tc[keyName] };
+                  : { value: key.key == "id" ? idx + 1 : p_tc[keyName] };
               return (
                 <input
                   key={keysIdx}

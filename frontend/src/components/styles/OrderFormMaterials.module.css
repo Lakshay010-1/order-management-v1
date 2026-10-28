@@ -1,7 +1,14 @@
+.container {
+    height: 23rem;
+    padding-right: 0.5rem;
+    overflow-y: scroll;
+}
+
+
 .materialsDetails {
     display: grid;
     grid-auto-flow: row;
-    grid-template-columns: repeat(4, auto);
+    grid-template-columns: repeat(6, auto);
 }
 
 .keyOne {

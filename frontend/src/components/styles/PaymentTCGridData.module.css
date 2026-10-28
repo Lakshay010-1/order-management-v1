@@ -1,7 +1,10 @@
 .paymentstcsDetails {
     display: grid;
     grid-auto-flow: row;
-    grid-template-columns: repeat(4, max-content);
+    grid-template-columns: repeat(4, auto);
+    overflow-y: scroll;
+    max-height: 22rem;
+    padding-right: 0.5rem;
 }
 
 .keyOne {

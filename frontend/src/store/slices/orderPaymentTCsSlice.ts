@@ -3,14 +3,13 @@ import {
   createSlice,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import type { PaymentTC } from "../../types/PaymentTC";
+import type { PaymentTC, NewOrderPaymentTC } from "../../types/PaymentTC";
 import {
   addOrderPaymentTC,
   deleteOrderPaymentTC,
   getOrderPaymentTCs,
   putOrderPaymentTC,
 } from "../../api/OrderPaymentTCsApi";
-import type { NewOrderPaymentTC } from "../../types/NewOrderPaymentTC";
 import { addData, deleteData, updateData } from "../../utils/handleArrayData";
 
 interface orderPaymentTCsState {

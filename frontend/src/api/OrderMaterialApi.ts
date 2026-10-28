@@ -1,5 +1,4 @@
-import type { Material } from "../types/Material";
-import type { NewOrderMaterial } from "../types/NewOrderMaterial";
+import type { Material, NewMaterial } from "../types/Material";
 import { API_LINK } from "./URLs";
 import { deleteMethodCall } from "./method_calls/DeleteCall";
 import { getMethodCall } from "./method_calls/GetCall";
@@ -10,12 +9,12 @@ const ORDER_MATERIAL_API_LINK: (
   order_id: number,
   material_id?: number,
 ) => string = (order_id, material_id) => {
-  return `${API_LINK}/orders/${order_id}/materials${material_id ? "/" + material_id : ""}`;
+  return `${API_LINK}/orders/${order_id}/materials${material_id ? `/${material_id}` : ""}`;
 };
 
 const addOrderMaterial: (
   order_id: number,
-  details: NewOrderMaterial,
+  details: NewMaterial,
 ) => Promise<Material> = async (order_id, details) => {
   return postMethodCall<Material>(ORDER_MATERIAL_API_LINK(order_id), details);
 };
@@ -29,7 +28,7 @@ const getOrderMaterials: (
 const putOrderMaterial: (
   order_id: number,
   material_id: number,
-  details: { quantity: number; date: Date },
+  details: NewMaterial,
 ) => Promise<boolean> = async (order_id, material_id, details) => {
   return putMethodCall(ORDER_MATERIAL_API_LINK(order_id, material_id), details);
 };

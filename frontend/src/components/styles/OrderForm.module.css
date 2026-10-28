@@ -1,6 +1,8 @@
 .container {
-    background-color: wheat;
+    /* background-color: rgb(255, 255, 254); */
     min-height: 100vh;
+    /* background-image: url("https://www.transparenttextures.com/patterns/always-grey.png"); */
+
 }
 
 .orderFormHeader {
@@ -32,26 +34,27 @@
 }
 
 .orderGrid {
-    /* display: grid;
+    display: grid;
     grid-template-areas:
-        "a a a a b b b b e e e e"
-        "f f f f f f g g g c c c"; */
-    display: flex;
-    flex-wrap: wrap;
+        "a a"
+        "b c";
+    /* display: flex;
+    flex-wrap: wrap; */
     /* overflow-x: scroll; */
     padding: 1rem;
     gap: 1rem;
     flex: 1;
     /* justify-content: space-evenly;   */
-    
+
     align-items: start;
     /* height: 100; */
 }
 
 
-.overviewContainer {
-    display: flex;
-    /* flex-direction: column; */
+.firstRow {
+    display: grid;
+    grid-template-areas: "a b b c";
+    align-items: stretch;
     gap: 1rem;
 }
 
@@ -72,12 +75,12 @@ input:disabled {
     /* padding: 0; */
 }
 
-.itemsAndMaterialsContainer{
+.itemsAndMaterialsContainer {
     display: flex;
     gap: 1rem;
 }
 
-.detailsContainer{
+.detailsContainer {
     display: flex;
     gap: 1rem;
     flex-direction: column;

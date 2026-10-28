@@ -26,10 +26,12 @@ export default function NavItems({
       />
       {items.map((item, idx) => {
         const itemCount =
-          orders.length > 0
-            ? orders.filter((order) => order[category.toLowerCase()] === item)
-                .length
-            : 0;
+          category == "Time"
+            ? ''
+            : orders.length > 0
+              ? orders.filter((order) => order[category.toLowerCase()] === item)
+                  .length
+              : 0;
         return (
           <NavItem
             key={idx}

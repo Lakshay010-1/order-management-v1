@@ -13,12 +13,5 @@ export default function Orders() {
     }
   }, [partyName, statusType, navigate]);
 
-  //   if (!partyName && !statusType) {
-  //     console.log("Both values are empty");
-  //     navigate("/dashboard");
-  //     console.log("Not Returned from page");
-  //     return null;
-  //   } else {
-  // }
   return <div>Orders : {partyName ? partyName : statusType}</div>;
 }

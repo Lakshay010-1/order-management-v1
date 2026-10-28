@@ -52,6 +52,27 @@ export default function Dashboard() {
           ? `No orders found with ${sortOrdersBy.type} = ${sortOrdersBy.value}`
           : "",
       );
+    } else if (type == "Time") {
+      const timeInfo = value.split("-");
+      const filterByYear = Number(timeInfo[0]),
+        filterByMonth = Number(timeInfo[1]);
+      let filteredOrdres = orders;
+      if (filterByMonth != 0) {
+        filteredOrdres = filteredOrdres.filter((o) => {
+          const orderMonth = new Date(o.po_date).getUTCMonth() + 1;
+          return orderMonth == filterByMonth;
+        });
+      }
+      filteredOrdres = filteredOrdres.filter((o) => {
+        const orderYear = new Date(o.po_date).getUTCFullYear();
+        return orderYear == filterByYear;
+      });
+      setSortedOrders(filteredOrdres);
+      setMessage(
+        filteredOrdres.length == 0
+          ? `No orders found from ${filterByMonth == 0 ? "year " : `${new Date(2000, filterByMonth - 1).toLocaleString("en-US", { month: "long" })}, `}${filterByYear}`
+          : "",
+      );
     }
   }, [sortOrdersBy]);
 

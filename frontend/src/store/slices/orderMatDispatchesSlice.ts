@@ -10,8 +10,7 @@ import {
   getOrderMaterialDispatches,
   putOrderMaterialDispatch,
 } from "../../api/OrderMaterialDispatchApi";
-import type { NewOrderMaterial } from "../../types/NewOrderMaterial";
-import { addData, deleteData, updateData } from "../../utils/handleArrayData";
+import { addData, updateData } from "../../utils/handleArrayData";
 
 interface orderMaterialDispatchesState {
   orderMaterialDispatches: Array<MaterialDispatch>;
@@ -49,7 +48,7 @@ export const insertOrderMaterialDispatch = createAsyncThunk(
   }: {
     order_id: number;
     material_id: number;
-    details: NewOrderMaterial;
+    details: MaterialDispatch;
   }) => {
     return await addOrderMaterialDispatch(order_id, material_id, details);
   },
@@ -66,7 +65,7 @@ export const updateOrderMaterialDispatch = createAsyncThunk(
     order_id: number;
     material_id: number;
     material_dispatch_id: number;
-    details: { quantity: number; date: Date };
+    details: MaterialDispatch;
   }) => {
     return await putOrderMaterialDispatch(
       order_id,
@@ -193,9 +192,8 @@ const orderMaterialDispatchesSlice = createSlice({
       .addCase(removeOrderMaterialDispatch.fulfilled, (state, action) => {
         state.error = null;
         state.loading = false;
-        state.orderMaterialDispatches = deleteData(
-          action.meta.arg.material_dispatch_id,
-          state.orderMaterialDispatches,
+        state.orderMaterialDispatches = state.orderMaterialDispatches.filter(
+          (dispatch) => dispatch.id !== action.meta.arg.material_dispatch_id,
         );
       })
       .addCase(removeOrderMaterialDispatch.rejected, (state, action) => {

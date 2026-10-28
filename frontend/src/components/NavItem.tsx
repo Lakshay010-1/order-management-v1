@@ -6,10 +6,12 @@ export default function NavItem({
   handleClick,
   itemCount,
   navItemSelected,
+  showCount = true,
 }: {
   item: string;
   navItemSelected: string;
   itemCount: number;
+  showCount: boolean;
   handleClick: (item: string) => void;
 }) {
   return (
@@ -18,7 +20,7 @@ export default function NavItem({
       className={`${styles.navItem} ${navItemSelected && navItemSelected === item ? styles.navItemSelected : ""}`}
     >
       <h3>{item}</h3>
-      <h4 className={styles.recordCount}>{itemCount}</h4>
+      {showCount && <h4 className={styles.recordCount}>{itemCount}</h4>}
     </div>
   );
 }

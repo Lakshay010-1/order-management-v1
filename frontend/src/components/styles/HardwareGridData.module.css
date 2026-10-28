@@ -8,7 +8,7 @@
     text-align: left;
     font-size: small;
     color: var(--color-03);
-    
+
     field-sizing: content;
     min-width: 1ch;
     max-width: 100%;
@@ -18,7 +18,9 @@
 
 .hardwareDetails {
     display: grid;
+    grid-template-rows: repeat(2, max-content);
     grid-auto-flow: column;
+    /* grid-template-columns: 1fr 1fr; */
 
     /* display: flex; */
     gap: 2rem;

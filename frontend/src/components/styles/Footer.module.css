@@ -1,6 +1,5 @@
-footer {
+.footer {
     font-family: sans-serif;
-    /* width: 100%; */
     padding: 1rem;
     text-align: center;
     background-color: black;
@@ -8,23 +7,28 @@ footer {
     display: flex;
     gap: 1rem;
     justify-content: center;
-    /* justify-self: end; */
+    align-items: center;
 }
 
-footer h1 a {
+h3 {
+    margin: 0;
+}
+
+h3 a {
     text-decoration: none;
 }
 
 
-footer h1 a:hover {
+h3 a:hover {
     color: greenyellow;
     text-decoration: underline;
 }
 
-footer h1 a:active {
+h3 a:active {
     color: green;
 }
 
-footer h1 a:visited {
+h3 a:visited {
     color: lightblue;
+    text-decoration: none;
 }

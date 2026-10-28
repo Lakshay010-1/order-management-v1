@@ -1,4 +1,4 @@
-import type { NewOrderPaymentTC } from "../types/NewOrderPaymentTC";
+import type { NewOrderPaymentTC } from "../types/PaymentTC";
 import type { PaymentTC } from "../types/PaymentTC";
 import { API_LINK } from "./URLs";
 import { deleteMethodCall } from "./method_calls/DeleteCall";

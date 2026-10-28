@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import type { Item } from "../types/Item";
+import type { Item } from "../types/Item.ts";
 import {
   fetchItems,
   insertItem,

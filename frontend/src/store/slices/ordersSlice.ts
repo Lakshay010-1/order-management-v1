@@ -1,8 +1,5 @@
-import {
-  createAsyncThunk,
-  createSlice,
-} from "@reduxjs/toolkit";
-import type { Order } from "../../types/Order";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import type { NewOrder_a, NewOrder_b, Order } from "../../types/Order";
 import {
   addOrder,
   deleteOrder,
@@ -10,8 +7,6 @@ import {
   getOrders,
   putOrder,
 } from "../../api/OrdersApi";
-import type { NewOrder } from "../../types/NewOrder";
-import type { OrderDetails } from "../../types/OrderDetails";
 import { addData, deleteData, updateData } from "../../utils/handleArrayData";
 
 interface OrdersState {
@@ -43,14 +38,14 @@ export const fetchOrder = createAsyncThunk(
 
 export const insertOrder = createAsyncThunk(
   "orders/insertOrder",
-  async (details: NewOrder) => {
+  async (details: NewOrder_b) => {
     return await addOrder(details);
   },
 );
 
 export const updateOrder = createAsyncThunk(
   "orders/updateOrder",
-  async ({ id, details }: { id: number; details: OrderDetails }) => {
+  async ({ id, details }: { id: number; details: NewOrder_a }) => {
     return await putOrder(id, details);
   },
 );

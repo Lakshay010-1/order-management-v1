@@ -1,7 +1,8 @@
 .hardwareDetails {
     display: grid;
     grid-auto-flow: column;
-
+    grid-template-rows: repeat(2, max-content);
+    
     /* display: flex; */
     gap: 2rem;
 }

@@ -2,19 +2,18 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./styles/Login.module.css";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { signIn, validateUser } from "../store/slices/authSlice";
+import { setUserAuthStatus } from "../store/slices/headerSlice";
 
 function Login() {
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [isRegistered, setIsRegistered] = useState(true);
   const dispatch = useAppDispatch();
-  // const { is_verified: is_user_verified } = useAppSelector(
-  //   (state) => state.auth,
-  // );
 
   function handleFormSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!isRegistered) {
+      dispatch(setUserAuthStatus(!isRegistered));
       setIsRegistered((prev) => !prev);
     } else {
       dispatch(
@@ -26,15 +25,8 @@ function Login() {
     }
   }
 
-  // useEffect(() => {
-  //   if (is_user_verified) {
-  //     dispatch(setUsername(usernameRef.current?.value ?? ""));
-  //   }
-  // }, [is_user_verified]);
-
   return (
     <div className={styles.container}>
-      <h1>{isRegistered ? "Login" : "Register"}</h1>
       <div>
         <form
           onSubmit={(e) => handleFormSubmit(e)}
@@ -64,7 +56,13 @@ function Login() {
           <p>
             {(isRegistered ? "Don't" : "Already") + " have an Account?"}{" "}
             <span>
-              <a onClick={() => setIsRegistered((prev) => !prev)} href="#">
+              <a
+                onClick={() => {
+                  dispatch(setUserAuthStatus(!isRegistered));
+                  setIsRegistered((prev) => !prev);
+                }}
+                href="#"
+              >
                 {!isRegistered ? "Login" : "Register"}
               </a>
             </span>

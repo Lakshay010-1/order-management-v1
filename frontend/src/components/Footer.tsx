@@ -3,13 +3,13 @@ import styles from "./styles/Footer.module.css";
 
 function Footer() {
   return (
-    <footer>
-      <h1>&copy;{new Date().getFullYear()}</h1>
-      <h1>
+    <footer className={styles.footer}>
+      <h3>&copy;{new Date().getFullYear()}</h3>
+      <h3>
         <a target="_blank" href="https://lakshaygoyal-lg.vercel.app">
           Lakshay Goyal
         </a>
-      </h1>
+      </h3>
     </footer>
   );
 }

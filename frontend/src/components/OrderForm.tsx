@@ -7,7 +7,7 @@ import { fetchStatuses } from "../store/slices/statusSlice";
 import { fetchItems } from "../store/slices/itemsSlice";
 import { fetchParties } from "../store/slices/partySlice";
 import { insertOrder } from "../store/slices/ordersSlice";
-import type { NewOrder } from "../types/NewOrder";
+import type { NewOrder_a } from "../types/Order";
 import OrderFormOverview from "./OrderFormOverview";
 import OrderFormItems from "./OrderFormItems";
 import OrderFormMaterials from "./OrderFormMaterials";
@@ -17,6 +17,8 @@ import OrderFormHardwareIns from "./OrderFormHardwareIns";
 import OrderFormSoftwareIns from "./OrderFormSoftwareIns";
 import OrderGridCell from "./OrderGridCell";
 import { useNavigate } from "react-router-dom";
+import { fetchPoTypes } from "../store/slices/poTypesSlice";
+import OrderFormServies from "./OrderFormServices";
 
 function createOptionsList(
   list: Array<any>,
@@ -32,12 +34,17 @@ function createOptionsList(
 }
 const newOrderInitialState = {
   po_date: new Date(),
-  hardware_installation_date: new Date(),
-  software_installation_date: new Date(),
-  hardware_installation_status_id: -1,
-  software_installation_status_id: -1,
-  status_id: -1,
-  party_id: -1,
+  po_number: "",
+  po_type_id: "",
+  status_id: "",
+  party_id: "",
+  total_services: "",
+  hardware_installation_date: "",
+  software_installation_date: "",
+  hardware_installation_expected_date: "",
+  software_installation_expected_date: "",
+  hardware_installation_status_id: "",
+  software_installation_status_id: "",
 };
 
 interface newItemAndMaterialState {
@@ -46,6 +53,13 @@ interface newItemAndMaterialState {
   quantity: number;
   date: Date;
 }
+
+interface newServiceState {
+  id: string;
+  description: string;
+  date: Date;
+}
+
 // interface newMaterialDispatchState {
 //   id: string;
 //   material_id: number;
@@ -60,7 +74,7 @@ interface newPaymentTCState {
 
 export default function OrderForm() {
   const dispatch = useAppDispatch();
-  const [newOrder, setNewOrder] = useState<NewOrder>(newOrderInitialState);
+  const [newOrder, setNewOrder] = useState<NewOrder_a>(newOrderInitialState);
   const navigate = useNavigate();
 
   const [addOrderStatus, setAddOrderStatus] = useState(false);
@@ -77,8 +91,11 @@ export default function OrderForm() {
   const { items, initialized: itemsInitialized } = useAppSelector(
     (state) => state.items,
   );
+  const { poTypes, initialized: poTypesInitialized } = useAppSelector(
+    (state) => state.poTypes,
+  );
 
-  const [orderItems, setOrderItems] = useState<Array<newItemAndMaterialState>>(
+  const [orderServices, setOrderServices] = useState<Array<newServiceState>>(
     [],
   );
 
@@ -101,22 +118,38 @@ export default function OrderForm() {
   const [statusesOptions, setStatusesOptions] = useState<
     Array<{ id: any; value: any }>
   >([]);
+  const [poTypesOptions, setPoTypesOptions] = useState<
+    Array<{ id: any; value: any }>
+  >([]);
 
-  const itemAndMaterialKeys = [
+  const materialKeys = [
     {
       name: "Item",
       type: "select",
       key: "item_id",
+      required: true,
     },
     {
       name: "Quantity",
       type: "number",
       key: "quantity",
+      required: true,
     },
     {
-      name: "Date",
+      name: "Order Date",
       type: "date",
-      key: "date",
+      key: "order_date",
+      required: true,
+    },
+    {
+      name: "Purchase Date",
+      type: "date",
+      key: "purchase_date",
+    },
+    {
+      name: "Deliver Date",
+      type: "date",
+      key: "deliver_date",
     },
   ];
   // const MaterialDispatchKeys = [
@@ -141,11 +174,13 @@ export default function OrderForm() {
       name: "Term",
       type: "text",
       key: "term",
+      required: true,
     },
     {
       name: "Fulfilled",
       type: "checkbox",
       key: "fulfilled",
+      required: true,
     },
   ];
 
@@ -157,14 +192,51 @@ export default function OrderForm() {
 
   useEffect(() => {
     if (addOrderStatus) {
+      const {
+        po_date,
+        po_number,
+        po_type_id,
+        status_id,
+        party_id,
+        total_services,
+        hardware_installation_date,
+        hardware_installation_expected_date,
+        hardware_installation_status_id,
+        software_installation_date,
+        software_installation_expected_date,
+        software_installation_status_id,
+      } = newOrder;
       const newOdr = {
-        ...newOrder,
-        items: orderItems,
+        po_date: formatDate(po_date),
+        po_number: Number(po_number),
+        po_type_id,
+        status_id,
+        party_id,
+        hardware_installation_expected_date: formatDate(
+          hardware_installation_expected_date,
+        ),
+        software_installation_expected_date: formatDate(
+          software_installation_expected_date,
+        ),
+        hardware_installation_status_id,
+        software_installation_status_id,
         materials: orderMaterials,
         payment_tcs: orderPaymentTCs,
       };
+      if (total_services) {
+        newOdr["total_services"] = Number(total_services);
+      }
+      if (software_installation_date) {
+        newOdr["software_installation_date"] = formatDate(
+          software_installation_date,
+        );
+      }
+      if (hardware_installation_date) {
+        newOdr["hardware_installation_date"] = formatDate(
+          hardware_installation_date,
+        );
+      }
       dispatch(insertOrder(newOdr));
-      setAddOrderStatus(false);
     }
   }, [addOrderStatus]);
 
@@ -183,6 +255,14 @@ export default function OrderForm() {
       setPartiesOptions(createOptionsList(parties, "id", "party"));
     }
   }, [partiesInitialized]);
+
+  useEffect(() => {
+    if (!poTypesInitialized) {
+      dispatch(fetchPoTypes());
+    } else {
+      setPoTypesOptions(createOptionsList(poTypes, "id", "type"));
+    }
+  }, [poTypesInitialized]);
 
   useEffect(() => {
     if (!statusesInitialized) {
@@ -213,44 +293,76 @@ export default function OrderForm() {
     if (!value) return "";
 
     const date = new Date(value as string | number);
-
-    return !Number.isNaN(date.getTime())
+    const dateStr = !Number.isNaN(date.getTime())
       ? date.toISOString().split("T")[0]
       : "";
+    return dateStr;
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.orderGrid}>
-        <div className={styles.overviewContainer}>
+        <div style={{ gridArea: "a" }} className={styles.firstRow}>
           <OrderGridCell gridArea="a" title="Overview" color="orange">
             <OrderFormOverview
               order={newOrder}
               handleChange={setNewOrder}
               partiesOptions={partiesOptions}
-              statusesOption={statusesOptions}
+              statusesOptions={statusesOptions}
+              formatDate={formatDate}
+              poTypesOptions={poTypesOptions}
+            />
+          </OrderGridCell>
+
+          {/* {newOrder.po_type_id == 2 && (
+            <OrderGridCell gridArea={""} title={"Services"} color={"#92EEFF"}>
+            <OrderFormServies
+                fields={servicesKeys}
+                orderServices={orderServices}
+                handleOrderServicesChange={setOrderServices}
+                formatDate={formatDate}
+              />
+            </OrderGridCell>
+          )} */}
+          <OrderGridCell gridArea="b" title="Materials" color="gold">
+            <OrderFormMaterials
+              fields={materialKeys}
+              itemsOptions={itemsOptions}
+              orderMaterials={orderMaterials}
+              handleOrderMaterialsChange={setOrderMaterials}
               formatDate={formatDate}
             />
           </OrderGridCell>
 
-          <OrderGridCell gridArea={""} title={"Hardware"} color={"blue"}>
-            <OrderFormHardwareIns
-              order={newOrder}
-              handleChange={setNewOrder}
-              statusesOptions={statusesOptions}
-              formatDate={formatDate}
-            />
-          </OrderGridCell>
-          <OrderGridCell gridArea={""} title={"Software"} color={"green"}>
-            <OrderFormSoftwareIns
-              order={newOrder}
-              handleChange={setNewOrder}
-              statusesOptions={statusesOptions}
-              formatDate={formatDate}
+          <OrderGridCell
+            gridArea={"c"}
+            title={"Payment Terms & Conditions"}
+            color={"yellow"}
+          >
+            <OrderFormPaymentTCs
+              fields={paymentTCKeys}
+              orderPaymentTCs={orderPaymentTCs}
+              handleOrderPaymentTCsChange={setOrderPaymentTCs}
             />
           </OrderGridCell>
         </div>
-        <OrderGridCell gridArea="b" title="Items" color="red">
+        <OrderGridCell gridArea={"b"} title={"Hardware"} color={"blue"}>
+          <OrderFormHardwareIns
+            order={newOrder}
+            handleChange={setNewOrder}
+            statusesOptions={statusesOptions}
+            formatDate={formatDate}
+          />
+        </OrderGridCell>
+        <OrderGridCell gridArea={"c"} title={"Software"} color={"green"}>
+          <OrderFormSoftwareIns
+            order={newOrder}
+            handleChange={setNewOrder}
+            statusesOptions={statusesOptions}
+            formatDate={formatDate}
+          />
+        </OrderGridCell>
+        {/* <OrderGridCell gridArea="b" title="Items" color="red">
           <OrderFormItems
             fields={itemAndMaterialKeys}
             itemsOptions={itemsOptions}
@@ -258,29 +370,7 @@ export default function OrderForm() {
             handleOrderItemsChange={setOrderItems}
             formatDate={formatDate}
           />
-        </OrderGridCell>
-
-        <OrderGridCell gridArea="f" title="Materials" color="gold">
-          <OrderFormMaterials
-            fields={itemAndMaterialKeys}
-            itemsOptions={itemsOptions}
-            orderMaterials={orderMaterials}
-            handleOrderMaterialsChange={setOrderMaterials}
-            formatDate={formatDate}
-          />
-        </OrderGridCell>
-
-        <OrderGridCell
-          gridArea={"e"}
-          title={"Payment Terms & Conditions"}
-          color={"yellow"}
-        >
-          <OrderFormPaymentTCs
-            fields={paymentTCKeys}
-            orderPaymentTCs={orderPaymentTCs}
-            handleOrderPaymentTCsChange={setOrderPaymentTCs}
-          />
-        </OrderGridCell>
+        </OrderGridCell> */}
       </div>
     </div>
   );

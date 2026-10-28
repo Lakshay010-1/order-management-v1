@@ -5,10 +5,27 @@ import styles from "./styles/SoftwareGridData.module.css";
 interface RowDataFormat {
   key: string;
   name: string;
+  type: string;
+  required?: boolean;
 }
 const softwareData: Array<RowDataFormat> = [
-  { name: "Installation Date", key: "software_installation_date" },
-  { name: "Installation Status", key: "software_installation_status" },
+  {
+    name: "Installation Date",
+    key: "software_installation_date",
+    type: "date",
+  },
+  {
+    name: "Expected Installation Date",
+    key: "software_installation_expected_date",
+    type: "date",
+    required: true,
+  },
+  {
+    name: "Installation Status",
+    key: "software_installation_status",
+    type: "select",
+    required: true,
+  },
 ];
 
 export default function SoftwareGridData({
@@ -26,11 +43,11 @@ export default function SoftwareGridData({
 }) {
   return (
     <div
-      style={{ gridTemplateRows: `repeat(${softwareData.length},1fr)` }}
+      // style={{ gridTemplateRows: `repeat(${softwareData.length},1fr)` }}
       className={styles.softwareDetails}
     >
       {softwareData.map((d, idx) => {
-        const isDate = d.key.toLowerCase().includes("date");
+        const isDate = d.type == "date";
         const field = d.key as keyof Order;
         const value = order[field];
         let inputValue;
@@ -42,9 +59,10 @@ export default function SoftwareGridData({
           <React.Fragment key={idx}>
             <p key={d.key} className={styles.keyOne}>
               {d.name}
+              <span className="text-red-600">{d?.required && "*"}</span>
             </p>
             <div>
-              {d.key == "software_installation_status" ? (
+              {d.type == "select" ? (
                 children
               ) : (
                 <input
@@ -57,7 +75,7 @@ export default function SoftwareGridData({
                     updateOrder((prev) => {
                       return {
                         ...prev,
-                        [d.key.toLowerCase()]: e.target.value,
+                        [d.key]: e.target.value,
                       };
                     })
                   }

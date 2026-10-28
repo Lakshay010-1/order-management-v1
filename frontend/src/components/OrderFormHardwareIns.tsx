@@ -5,6 +5,12 @@ import BasicSelect from "./Select";
 
 const hardwareInstallationKeys = [
   {
+    name: "Expected Installation Date",
+    type: "date",
+    key: "hardware_installation_expected_date",
+    required: true,
+  },
+  {
     name: "Installation Date",
     type: "date",
     key: "hardware_installation_date",
@@ -13,6 +19,7 @@ const hardwareInstallationKeys = [
     name: "Installation Status",
     type: "select",
     key: "hardware_installation_status_id",
+    required: true,
   },
 ];
 
@@ -41,9 +48,9 @@ export default function OrderFormHardwareIns({
   return (
     <div
       className={styles.hardwareDetails}
-      style={{
-        gridTemplateRows: `repeat(${hardwareInstallationKeys.length},1fr)`,
-      }}
+      // style={{
+      //   gridTemplateRows: `repeat(${hardwareInstallationKeys.length},1fr)`,
+      // }}
     >
       {hardwareInstallationKeys.map((field) => {
         const value = order[field.key as keyof NewOrder];
@@ -51,7 +58,10 @@ export default function OrderFormHardwareIns({
 
         return (
           <React.Fragment key={field.key}>
-            <p>{field.name}</p>
+            <p>
+              {field.name}
+              <span className="text-red-600">{field?.required && "*"}</span>
+            </p>
             {field.type === "select" ? (
               <BasicSelect
                 options={statusesOptions}

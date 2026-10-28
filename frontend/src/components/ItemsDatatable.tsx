@@ -120,7 +120,7 @@ export default function BasicTable<T>({
     <div className={styles.container}>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="items table">
-          <TableHead>
+          <TableHead style={{ backgroundColor: "#d0d8e1" }}>
             <TableRow>
               {fields.map((field) => (
                 <TableCell align="center" key={field}>

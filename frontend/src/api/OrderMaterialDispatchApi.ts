@@ -16,7 +16,7 @@ const ORDER_MATERIAL_DISPATCH_API_LINK: (
 const addOrderMaterialDispatch: (
   order_id: number,
   material_id: number,
-  details: { item_id: number; quantity: number; date: Date },
+  details: MaterialDispatch,
 ) => Promise<MaterialDispatch> = async (order_id, material_id, details) => {
   return postMethodCall<MaterialDispatch>(
     ORDER_MATERIAL_DISPATCH_API_LINK(order_id, material_id),
@@ -37,7 +37,7 @@ const putOrderMaterialDispatch: (
   order_id: number,
   material_id: number,
   material_dispatch_id: number,
-  details: { quantity: number; date: Date },
+  details: MaterialDispatch,
 ) => Promise<boolean> = async (
   order_id,
   material_id,

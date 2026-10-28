@@ -1,4 +1,6 @@
 .container {
     display: flex;
-    background-color: var(--color-02)
+    background-color: #73859a;
+    overflow-x: scroll;
+    padding: 0.2rem;
 }

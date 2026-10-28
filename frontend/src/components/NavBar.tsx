@@ -13,6 +13,7 @@ export default function NavBar(props: {
   const categories = [
     { id: 0, value: "Status" },
     { id: 1, value: "Party" },
+    { id: 2, value: "Time" },
   ];
   const parties = useAppSelector((state) => state.parties.parties);
   const { statuses } = useAppSelector((state) => state.statuses);
@@ -22,6 +23,9 @@ export default function NavBar(props: {
   const [clickedItem, setClickedItem] = useState("All");
 
   useEffect(() => {
+    if (category.id == 2) {
+      return;
+    }
     props.setSortOrdersBy({ type: category.value, value: clickedItem });
   }, [clickedItem]);
 
@@ -40,7 +44,7 @@ export default function NavBar(props: {
   useEffect(() => {
     if (category.value == categories[0].value) {
       setItems(statuses.map((status) => status.status));
-    } else {
+    } else if (category.value == categories[1].value) {
       setItems(parties.map((party) => party.party));
     }
   }, [parties, statuses, category]);
@@ -57,12 +61,57 @@ export default function NavBar(props: {
         handleOptionChange={handleOptionChange}
         options={categories}
       />
-      <NavItems
-        items={items}
-        navItemSelected={clickedItem}
-        category={category.value}
-        handleClick={setClickedItem}
-      />
+      {category.id !== 2 ? (
+        <NavItems
+          items={items}
+          navItemSelected={clickedItem}
+          category={category.value}
+          handleClick={setClickedItem}
+        />
+      ) : (
+        <div style={{ display: "flex", width: "100%" }}>
+          <NavItems
+            items={["Month", "Year"]}
+            navItemSelected={clickedItem}
+            category={category.value}
+            handleClick={setClickedItem}
+          />
+          {clickedItem !== "All" && (
+            <>
+              {clickedItem == "Month" ? (
+                <input
+                  type="month"
+                  onChange={(e) =>
+                    props.setSortOrdersBy({
+                      type: category.value,
+                      value: e.target.value,
+                    })
+                  }
+                />
+              ) : (
+                <input
+                  type="number"
+                  min={2000}
+                  max={2099}
+                  placeholder="Year"
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (val > 9999 || val <= 999) {
+                      return;
+                    }
+                    props.setSortOrdersBy((prev) => {
+                      return {
+                        type: category.value,
+                        value: `${val}-00`,
+                      };
+                    });
+                  }}
+                />
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

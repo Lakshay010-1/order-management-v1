@@ -17,18 +17,23 @@ import {
 import { fetchorderMaterials } from "../store/slices/orderMaterialsSlice";
 import Loader from "./Loader";
 import BasicSelect from "./Select";
+import { fetchDeliveryMediums } from "../store/slices/deliveryMediumsSlice";
 
 const materialDispatchesKeys = [
-  { name: "Id", type: "number" },
-  { name: "Material_ID", type: "text" },
-  { name: "Quantity", type: "text" },
-  { name: "Date", type: "date" },
+  { name: "Id", type: "number", key: "id" },
+  { name: "Material ID", type: "select", key: "material_id", required: true },
+  { name: "Quantity", type: "number", key: "quantity", required: true },
+  { name: "Dispatch Date", type: "date", key: "dispatch_date", required: true },
+  { name: "Confirmation Date", type: "date", key: "confirmation_date" },
+  { name: "Delivered By", type: "select", key: "delivered_by", required: true },
 ];
 
 const addDataInitialState = {
   material: { id: -1, value: "" },
-  quantity: 0,
-  date: new Date().toISOString().split("T")[0],
+  quantity: "",
+  dispatch_date: "",
+  confirmation_date: "",
+  delivered_by: { id: -1, value: "" },
 };
 
 export default function MaterialsDispatchesGridData({
@@ -50,6 +55,9 @@ export default function MaterialsDispatchesGridData({
     error: orderMaterialDispatchesError,
   } = useAppSelector((state) => state.orderMatDispatches);
 
+  const { deliveryMediums, initialized: deliveryMediumsInitialized } =
+    useAppSelector((state) => state.deliveryMediums);
+
   const {
     orderMaterials,
     intialized: orderMaterialsIntialized,
@@ -57,11 +65,13 @@ export default function MaterialsDispatchesGridData({
   } = useAppSelector((state) => state.orderMaterials);
 
   const [add, setAdd] = useState<boolean>(false);
-  const [addData, setAddData] = useState(addDataInitialState);
+  const [addData, setAddData] = useState<MaterialDispatch>(addDataInitialState);
 
-  const [quantityError, setQuantityError] = useState(false);
-  const [MaterialDispatchError, setMaterialDispatchError] = useState(false);
+  const [error, setError] = useState(false);
 
+  const [deliveryOptions, setDeliveryOptions] = useState<
+    Array<{ id: number; value: string }>
+  >([]);
   const [materialsOptions, setMaterialsOptions] = useState<
     Array<{ id: number; value: string }>
   >([]);
@@ -77,7 +87,7 @@ export default function MaterialsDispatchesGridData({
     value: string;
   }>({ id: -1, value: "" });
 
-  function handleItemOptionChange(id: number) {
+  function handleMaterialItemOptionChange(id: number) {
     const orderMatItems = orderMaterials.find((m) => m.id === id);
     setAddData((prev) => {
       return {
@@ -86,25 +96,51 @@ export default function MaterialsDispatchesGridData({
       };
     });
   }
+  function handleDeliveryItemOptionChange(id: number) {
+    const deliveryItems = deliveryOptions.find((d) => d.id === id);
+    setAddData((prev) => {
+      return {
+        ...prev,
+        delivered_by: { id: deliveryItems!.id, value: deliveryItems.medium },
+      };
+    });
+  }
 
   function handleAddMaterialDispatch() {
-    const { material, date, quantity } = addData;
-    if (quantity == 0 || material.value == "") {
-      setQuantityError(quantity == 0);
-      setMaterialDispatchError(material.value == "");
+    const {
+      material,
+      dispatch_date,
+      confirmation_date,
+      delivered_by,
+      quantity,
+    } = addData;
+    if (
+      !quantity ||
+      Number(quantity) == 0 ||
+      !material.value ||
+      !dispatch_date ||
+      !delivered_by.id
+    ) {
+      setError(true);
       return;
     }
-    dispatch(
-      insertOrderMaterialDispatch({
-        order_id: order.id,
-        material_id: material.id,
-        details: {
-          item_id: material.id,
-          date: new Date(date),
-          quantity: Number(quantity),
-        },
-      }),
-    );
+    setError(false);
+    const newOrderMaterialDispatch = {
+      order_id: order.id,
+      material_id: material.id,
+      details: {
+        item_id: material.id,
+        quantity: Number(quantity),
+        dispatch_date: new Date(dispatch_date),
+        delivered_by: delivered_by.id,
+      },
+    };
+    if (confirmation_date) {
+      newOrderMaterialDispatch["details"]["confirmation_date"] = new Date(
+        confirmation_date,
+      );
+    }
+    dispatch(insertOrderMaterialDispatch(newOrderMaterialDispatch));
     setAddData(addDataInitialState);
     setAdd(false);
   }
@@ -132,7 +168,9 @@ export default function MaterialsDispatchesGridData({
             material_dispatch_id: oMatDisptch.id,
             details: {
               quantity: Number(oMatDisptch.quantity),
-              date: new Date(oMatDisptch.date),
+              dispatch_date: new Date(oMatDisptch.dispatch_date),
+              delivered_by: oMatDisptch.delivered_by.id,
+              confirmation_date: new Date(oMatDisptch.confirmation_date),
             },
           }),
         );
@@ -161,6 +199,17 @@ export default function MaterialsDispatchesGridData({
       dispatch(fetchorderMaterials(order.id));
     }
   }, [orderMaterialsIntialized, order]);
+
+  useEffect(() => {
+    if (deliveryMediumsInitialized) {
+      const oDelItems = deliveryMediums.map((delMed) => {
+        return { id: delMed.id, value: delMed.medium };
+      });
+      setDeliveryOptions(oDelItems);
+    } else {
+      dispatch(fetchDeliveryMediums());
+    }
+  }, [deliveryMediumsInitialized]);
 
   useEffect(() => {
     if (orderMaterialsIntialized) {
@@ -220,6 +269,7 @@ export default function MaterialsDispatchesGridData({
       {materialDispatchesKeys.map((key) => (
         <p className={styles.keyOne} key={key.name}>
           {key.name}
+          <span className="text-red-600">{key?.required && "*"}</span>
         </p>
       ))}
       <button
@@ -232,28 +282,47 @@ export default function MaterialsDispatchesGridData({
       {add && (
         <>
           {materialDispatchesKeys.map((key, idx) => {
-            if (key.name == "Material_ID") {
-              return (
-                <BasicSelect
-                  options={materialsOptions}
-                  selectedOption={addData.material}
-                  handleOptionChange={handleItemOptionChange}
-                />
-              );
+            if (key.type == "select") {
+              if (key.key == "material_id") {
+                return (
+                  <BasicSelect
+                    options={materialsOptions}
+                    selectedOption={addData.material}
+                    handleOptionChange={handleMaterialItemOptionChange}
+                    required={error}
+                  />
+                );
+              } else if (key.key == "delivered_by") {
+                return (
+                  <BasicSelect
+                    options={deliveryOptions}
+                    selectedOption={addData.delivered_by}
+                    handleOptionChange={handleDeliveryItemOptionChange}
+                    required={error}
+                  />
+                );
+              }
             }
             return (
               <input
-                disabled={key.name == "Id"}
+                style={
+                  error && key?.required
+                    ? {
+                        border: "1px solid red",
+                      }
+                    : {}
+                }
+                disabled={key.key == "id"}
                 onChange={(e) =>
                   setAddData((prev) => {
                     return {
                       ...prev,
-                      [key.name.toLowerCase()]: e.target.value,
+                      [key.key]: e.target.value,
                     };
                   })
                 }
-                value={addData[key.name.toLowerCase()]}
-                type={key.name.toLowerCase() === "date" ? "date" : "number"}
+                value={addData[key.key]}
+                type={key.type}
                 className={styles.valueOne}
               />
             );
@@ -270,21 +339,29 @@ export default function MaterialsDispatchesGridData({
         return (
           <React.Fragment key={matDisptchIdx}>
             {materialDispatchesKeys.map((key, idx) => {
-              const keyName = key.name.toLowerCase();
+              const keyName = key.key;
+              const val = matDispatch[keyName];
+              const updatedVal =
+                key.type == "date"
+                  ? formatDate(val)
+                  : key.key == "delivered_by"
+                    ? matDispatch["delivery_medium"]
+                    : key.key == "id"
+                      ? matDisptchIdx + 1
+                      : val;
               return (
                 <input
                   key={idx}
                   disabled={
-                    !editMode || key.name == "Id" || key.name == "Material_ID"
+                    !editMode ||
+                    key.key == "id" ||
+                    key.key == "material_id" ||
+                    key.key == "delivered_by"
                   }
                   type={key.type}
                   name={keyName}
                   className={styles.valueOne}
-                  value={
-                    key.type == "date"
-                      ? formatDate(matDispatch[keyName])
-                      : matDispatch[keyName]
-                  }
+                  value={updatedVal}
                   onChange={(e) =>
                     setOrderMaterialDispatchesData((prev) => {
                       const updatedMaterialDispatches = prev.map((matDis) => {

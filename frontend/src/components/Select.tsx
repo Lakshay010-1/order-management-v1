@@ -8,11 +8,13 @@ export default function BasicSelect({
   selectedOption,
   handleOptionChange,
   isDisabled,
+  required = false,
 }: {
   options: Array<{ id: number; value: string }>;
   selectedOption: { id: number; value: string };
   handleOptionChange: (id: number) => void;
   isDisabled?: boolean;
+  required?: boolean;
 }) {
   const handleChange = (event: SelectChangeEvent) => {
     handleOptionChange(Number(event.target.value));
@@ -26,7 +28,10 @@ export default function BasicSelect({
         value={String(selectedOption.id == -1 ? "" : selectedOption.id)}
         onChange={handleChange}
         disabled={isDisabled ?? false}
-        style={{ width: "100%" }}
+        style={{
+          width: "100%",
+          ...(required ? { border: "1px solid red" } : {}),
+        }}
       >
         {options.map((curItem: { id: number; value: string }, idx: number) => (
           <MenuItem key={idx} value={String(curItem.id)}>

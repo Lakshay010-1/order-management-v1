@@ -3,6 +3,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { signOut } from "../store/slices/authSlice";
 import styles from "./styles/Profile.module.css";
+import { resetHeaderState } from "../store/slices/headerSlice";
 
 export default function Profile() {
   const dispatch = useAppDispatch();
@@ -21,7 +22,14 @@ export default function Profile() {
         <AccountCircleIcon />
         <h3>{usernameValue}</h3>
       </div>
-      <button onClick={async () => dispatch(signOut())}>Logout</button>
+      <button
+        onClick={async () => {
+          await dispatch(resetHeaderState());
+          await dispatch(signOut());
+        }}
+      >
+        Logout
+      </button>
     </div>
   );
 }
