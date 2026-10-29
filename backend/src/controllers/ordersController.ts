@@ -41,26 +41,12 @@ const getOrder = async (req: Request, res: Response) => {
 };
 
 const addOrder = async (req: Request, res: Response) => {
-  const bodySchema = z.object({
+  const bodySchema1 = z.object({
     po_date: z.coerce.date(),
     po_number: z.number(),
     po_type_id: z.number(),
-    total_services: z.number().optional(),
-    hardware_installation_date: z.coerce.date().optional(),
-    hardware_installation_expected_date: z.coerce.date(),
-    hardware_installation_status_id: z.number(),
-    software_installation_date: z.coerce.date().optional(),
-    software_installation_expected_date: z.coerce.date(),
-    software_installation_status_id: z.number(),
     status_id: z.number(),
     party_id: z.number(),
-    materials: z.array(
-      z.object({
-        item_id: z.number(),
-        quantity: z.number(),
-        order_date: z.coerce.date(),
-      }),
-    ),
     payment_tcs: z.array(
       z.object({
         term: z.string(),
@@ -68,19 +54,47 @@ const addOrder = async (req: Request, res: Response) => {
       }),
     ),
   });
-  const paramsValid = bodySchema.safeParse(req.body);
-  if (!paramsValid.success) {
+  const validParmas_overview = bodySchema1.safeParse(req.body);
+  if (!validParmas_overview.success) {
     return apiResponse(res, 400, "Invalid request parameters");
   }
+  const bodySchema_service = z.object({
+    total_services: z.number(),
+    services: z.array(
+      z.object({ description: z.string(), date: z.coerce.date() }),
+    ),
+  });
+  const bodySchema_installation = z.object({
+    hardware_installation_date: z.coerce.date().optional(),
+    hardware_installation_expected_date: z.coerce.date(),
+    hardware_installation_status_id: z.number(),
+    software_installation_date: z.coerce.date().optional(),
+    software_installation_expected_date: z.coerce.date(),
+    software_installation_status_id: z.number(),
+    materials: z.array(
+      z.object({
+        item_id: z.number(),
+        quantity: z.number(),
+        order_date: z.coerce.date(),
+      }),
+    ),
+  });
+  const po_type_id = Number(req.body.po_type_id);
+  const paramsValid_installation = bodySchema_installation.safeParse(req.body);
+  const paramsValid_service = bodySchema_service.safeParse(req.body);
+  if (po_type_id == 1) {
+    if (!paramsValid_installation.success) {
+      return apiResponse(res, 400, "Invalid request parameters");
+    }
+  } else if (po_type_id == 2) {
+    if (!paramsValid_service.success) {
+      return apiResponse(res, 400, "Invalid request parameters");
+    }
+  } else {
+    return apiResponse(res, 400, "Invalid PO Type");
+  }
   try {
-    const response = await insertOrder({
-      ...paramsValid.data,
-      total_services: paramsValid.data.total_services ?? undefined,
-      hardware_installation_date:
-        paramsValid.data.hardware_installation_date ?? undefined,
-      software_installation_date:
-        paramsValid.data.software_installation_date ?? undefined,
-    });
+    const response = await insertOrder(req.body);
     if (!response) {
       return apiResponse(res, 400, "Failed to add order");
     }

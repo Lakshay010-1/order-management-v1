@@ -1,6 +1,6 @@
 import type { Material, NewMaterial } from "./Material.js";
 import type { PaymentTC } from "./PaymentTC.js";
-import type { OrderService } from "./Service.js";
+import type { NewOrderService, OrderService } from "./Service.js";
 
 export interface Order {
   id: number;
@@ -37,4 +37,5 @@ export interface NewOrder {
   party_id: number;
   materials: Array<NewMaterial>;
   payment_tcs: Array<PaymentTC>;
+  services?: Array<NewOrderService>;
 }
