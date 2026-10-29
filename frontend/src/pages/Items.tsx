@@ -10,10 +10,15 @@ import {
 import Loader from "../components/Loader";
 import BasicTable from "../components/ItemsDatatable";
 import { setHeaderContent } from "../store/slices/headerSlice";
+import AlertDialog from "../components/AlertDialog.tsx";
 
 export default function Items() {
   const fields = ["id", "item", "created_at"];
   const [itemsMsg, setItemsMsg] = useState("");
+  const [orderDeleteId, setOrderDeleteId] = React.useState(-1);
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [dialogTitle, setdialogTitle] = React.useState("");
+  const [dialogMsg, setdialogMsg] = React.useState("");
   const {
     items,
     loading: itemsLoading,
@@ -29,8 +34,20 @@ export default function Items() {
     dispatch(updateItem({ id, item: updatedData.item }));
   }
 
+  function handleDecision(decision: boolean) {
+    if (decision) {
+      dispatch(removeItem(orderDeleteId));
+    }
+    setOpenDialog(false);
+  }
+
   function handleDelete(id: number) {
-    dispatch(removeItem(id));
+    setOpenDialog(true);
+    setOrderDeleteId(id);
+    setdialogMsg(
+      `Click \n 'DELETE' to proceed to delete item:${id}\nOR\n'CANCEL' to cancel the operation`,
+    );
+    setdialogTitle(`Delete Item:${id}`);
   }
 
   useEffect(() => {
@@ -53,15 +70,24 @@ export default function Items() {
   ) : itemsLoading ? (
     <Loader message={itemsMsg} />
   ) : (
-    <BasicTable
-      fields={fields}
-      data={items}
-      intialState={{
-        item: "",
-      }}
-      handleUpdate={handleUpdate}
-      handleDelete={handleDelete}
-      handleAdd={handleAdd}
-    />
+    <>
+      <BasicTable
+        fields={fields}
+        data={items}
+        intialState={{
+          item: "",
+        }}
+        handleUpdate={handleUpdate}
+        handleDelete={handleDelete}
+        handleAdd={handleAdd}
+      />
+
+      <AlertDialog
+        open={openDialog}
+        setDecision={handleDecision}
+        message={dialogMsg}
+        title={dialogTitle}
+      />
+    </>
   );
 }

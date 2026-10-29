@@ -19,10 +19,6 @@
     /* display: flex;
     flex-wrap: wrap; */
     display: grid;
-    grid-template-areas:
-        "a a a a b b b b c c c c"
-        "d d d d d d e e e e e e"
-        "f f f f f f g g g g g g";
     padding: 1rem;
     gap: 1rem;
     flex: 1;
@@ -37,6 +33,12 @@
         "a a f f c c"
         "a a g g c c"
         "d d d e e e";
+}
+
+.orderGrid_b {
+    grid-template-areas:
+        "a b c";
+    grid-template-columns: repeat(3, 1fr);
 }
 
 

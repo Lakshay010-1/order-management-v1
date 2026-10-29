@@ -11,6 +11,7 @@ import { type Order } from "../types/Order";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AlertDialog from "./AlertDialog";
 
 function Row(props: {
   onRow: number | null;
@@ -51,29 +52,33 @@ function Row(props: {
         </TableCell>
         <TableCell align="center">{row.status}</TableCell>
         <TableCell align="center">
-          {row?.materials.length <= 0
+          {!row?.materials || row.materials.length == 0
             ? "-"
             : new Date(row.materials[0].order_date).toLocaleDateString("en-GB")}
         </TableCell>
         <TableCell align="center">
-          {new Date(row.hardware_installation_expected_date).toLocaleDateString(
-            "en-GB",
-          )}
+          {!row.hardware_installation_expected_date
+            ? "-"
+            : (new Date(
+                row.hardware_installation_expected_date,
+              ).toLocaleDateString("en-GB") ?? "-")}
         </TableCell>
         <TableCell align="center">
-          {row.hardware_installation_date
+          {row?.hardware_installation_date
             ? new Date(row.hardware_installation_date).toLocaleDateString(
                 "en-GB",
               )
             : "-"}
         </TableCell>
         <TableCell align="center">
-          {new Date(row.software_installation_expected_date).toLocaleDateString(
-            "en-GB",
-          )}
+          {!row.software_installation_expected_date
+            ? "-"
+            : (new Date(
+                row.software_installation_expected_date,
+              ).toLocaleDateString("en-GB") ?? "-")}
         </TableCell>
         <TableCell align="center">
-          {row.software_installation_date
+          {row?.software_installation_date
             ? new Date(row.software_installation_date).toLocaleDateString(
                 "en-GB",
               )
@@ -101,10 +106,23 @@ export default function CollapsibleTable({
   handleDelete: (id: number) => void;
 }) {
   const [onRow, setOnRow] = React.useState(null);
+  const [orderDeleteId, setOrderDeleteId] = React.useState(-1);
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [dialogTitle, setdialogTitle] = React.useState("");
+  const [dialogMsg, setdialogMsg] = React.useState("");
+
   const navigate = useNavigate();
 
   function handleOrderRowClick(order_id: number) {
     navigate(`/orders/${order_id}`);
+  }
+
+  function handleDecision(decision: boolean) {
+    if (decision) {
+      handleDelete(orderDeleteId);
+    }
+
+    setOpenDialog(false);
   }
 
   function handleDeleteClick(
@@ -112,7 +130,12 @@ export default function CollapsibleTable({
     id: number,
   ) {
     e.stopPropagation();
-    handleDelete(id);
+    setOpenDialog(true);
+    setOrderDeleteId(id);
+    setdialogMsg(
+      `Click \n 'DELETE' to proceed to delete order:${id}\nOR\n'CANCEL' to cancel the operation`,
+    );
+    setdialogTitle(`Delete Order:${id}`);
   }
 
   function handleAddMode() {
@@ -120,6 +143,12 @@ export default function CollapsibleTable({
   }
   return (
     <div className={styles.tableContainer}>
+      <AlertDialog
+        open={openDialog}
+        setDecision={handleDecision}
+        message={dialogMsg}
+        title={dialogTitle}
+      />
       <TableContainer component={Paper} style={{ border: "1px solid black" }}>
         <Table aria-label="collapsible table">
           <TableHead style={{ backgroundColor: "#d0d8e1" }}>

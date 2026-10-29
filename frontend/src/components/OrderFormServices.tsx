@@ -4,14 +4,19 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { v4 as uuidv4 } from "uuid";
+import type { NewOrder_a } from "../types/Order";
 
 export default function OrderFormServies({
   fields,
+  order,
+  handleOrderChange,
   handleOrderServicesChange,
   orderServices,
   formatDate,
 }: {
   fields: Array<any>;
+  order: NewOrder_a;
+  handleOrderChange: (val: any) => void;
   handleOrderServicesChange: (value: any) => void;
   orderServices: Array<any>;
   formatDate: (val: any) => string;
@@ -19,10 +24,11 @@ export default function OrderFormServies({
   const addDataInitialState = {
     id: -1,
     description: "",
-    date: new Date(),
+    date: "",
   };
 
   const [addData, setAddData] = useState(addDataInitialState);
+  const [error, setError] = useState(false);
 
   function clearSelections() {
     setAddData(addDataInitialState);
@@ -31,24 +37,29 @@ export default function OrderFormServies({
   return (
     <div className={styles.container}>
       <div className={styles.totalServicesP}>
-        <p>
-          Total Serv  ices to give
-          {/* Total Services Required: <span>{orderServices.length}</span> */}
-        </p>
-        <input />
+        <p>Total Services</p>
+        <input
+          type="number"
+          value={!order.total_services ? 0 : order.total_services}
+          onChange={(e) =>
+            handleOrderChange((prev) => {
+              return { ...prev, total_services: e.target.value };
+            })
+          }
+        />
       </div>
       <div
-        style={{
-          gridTemplateRows: `repeat(${orderServices.length + 1},1fr)`,
-        }}
+        // style={{
+        //   gridTemplateRows: `repeat(${orderServices.length + 1},1fr)`,
+        // }}
         className={styles.servicesDetails}
       >
         <p className="keyOne"> S.No.</p>
         {fields.map((field, fieldIdx) => (
           <p className="keyOne" key={fieldIdx}>
             {field.name}
-            
-          <span className="text-red-600">{field?.required && "*"}</span>
+
+            <span className="text-red-600">{field?.required && "*"}</span>
           </p>
         ))}
 
@@ -65,6 +76,9 @@ export default function OrderFormServies({
           const minimumNumVal = type == "number" ? { min: 0 } : {};
           return (
             <input
+              style={{
+                border: field.required && error ? "1px solid red" : "",
+              }}
               {...minimumNumVal}
               key={fieldIdx + key}
               placeholder={name}
@@ -80,7 +94,11 @@ export default function OrderFormServies({
         })}
         <button
           className={`${styles.actionBtn} ${styles.green}`}
-          onClick={() =>
+          onClick={() => {
+            if (!addData.date) {
+              setError(true);
+              return;
+            }
             handleOrderServicesChange((prev) => {
               const updatedorderServices = [
                 ...prev,
@@ -88,8 +106,8 @@ export default function OrderFormServies({
               ];
               clearSelections();
               return updatedorderServices;
-            })
-          }
+            });
+          }}
         >
           <AddIcon />
         </button>

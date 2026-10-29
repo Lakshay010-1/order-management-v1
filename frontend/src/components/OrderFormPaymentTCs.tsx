@@ -5,10 +5,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 export default function OrderFormPaymentTCs({
+  po_type_id,
   fields,
   orderPaymentTCs,
   handleOrderPaymentTCsChange,
 }: {
+  po_type_id: number;
   fields: Array<any>;
   orderPaymentTCs: Array<any>;
   handleOrderPaymentTCsChange: (val: any) => void;
@@ -22,7 +24,10 @@ export default function OrderFormPaymentTCs({
   }
 
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      style={{ height: po_type_id == 1 ? "19rem" : "" }}
+    >
       <div
         style={{
           gridTemplateRows: `repeat(${orderPaymentTCs.length + 1},1fr)`,

@@ -10,6 +10,7 @@ import {
 import Loader from "../components/Loader";
 import type { Party } from "../types/Party";
 import { setHeaderContent } from "../store/slices/headerSlice";
+import AlertDialog from "../components/AlertDialog";
 
 export default function Parties() {
   const fields: (keyof Party)[] = [
@@ -20,6 +21,10 @@ export default function Parties() {
     "contact_email",
   ];
   const [partiesMsg, setPartiesMsg] = useState("");
+  const [orderDeleteId, setOrderDeleteId] = React.useState(-1);
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [dialogTitle, setdialogTitle] = React.useState("");
+  const [dialogMsg, setdialogMsg] = React.useState("");
   const {
     parties,
     loading: partiesLoading,
@@ -48,8 +53,20 @@ export default function Parties() {
     // dispatch(partyUpdate({ id, details }));
   }
 
+  function handleDecision(decision: boolean) {
+    if (decision) {
+      dispatch(removeParty(orderDeleteId));
+    }
+    setOpenDialog(false);
+  }
+
   function handleDelete(id: number) {
-    dispatch(removeParty(id));
+    setOpenDialog(true);
+    setOrderDeleteId(id);
+    setdialogMsg(
+      `Click \n 'DELETE' to proceed to delete party and all party's associated orders with the party\nOR\n'CANCEL' to cancel the operation`,
+    );
+    setdialogTitle(`Delete Party:${id}`);
     // dispatch(partyDelete(id));
   }
 
@@ -69,18 +86,26 @@ export default function Parties() {
   ) : partiesLoading ? (
     <Loader message={partiesMsg} />
   ) : (
-    <BasicTable
-      fields={fields}
-      data={parties}
-      intialState={{
-        party: "",
-        contact_person: "",
-        contact_num: undefined,
-        contact_email: "",
-      }}
-      handleUpdate={handleUpdate}
-      handleDelete={handleDelete}
-      handleAdd={handleAdd}
-    />
+    <>
+      <BasicTable
+        fields={fields}
+        data={parties}
+        intialState={{
+          party: "",
+          contact_person: "",
+          contact_num: undefined,
+          contact_email: "",
+        }}
+        handleUpdate={handleUpdate}
+        handleDelete={handleDelete}
+        handleAdd={handleAdd}
+      />
+      <AlertDialog
+        open={openDialog}
+        setDecision={handleDecision}
+        message={dialogMsg}
+        title={dialogTitle}
+      />
+    </>
   );
 }

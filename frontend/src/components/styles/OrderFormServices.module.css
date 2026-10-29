@@ -1,23 +1,29 @@
-.container{
+.container {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 
 }
 
-.totalServicesP{
+.totalServicesP {
     display: flex;
+    justify-content: center;
 }
 
-.totalServicesP span{
+.totalServicesP * {
+    width: 50%;
+}
+
+.totalServicesP span {
     text-decoration: underline;
     font-weight: 600;
 }
 
 .servicesDetails {
+    width: 100%;
     display: grid;
     grid-auto-flow: row;
-    grid-template-columns: repeat(4, max-content);
+    grid-template-columns: repeat(4, auto);
 }
 
 .keyOne {
@@ -33,11 +39,11 @@
     /* width: 100%; */
     /* max-width:fit-content; */
     font-size: small;
-    max-width: max-content;
+    /* max-width: max-content; */
     color: var(--color-03);
     field-sizing: content;
     min-width: 1ch;
-    max-width: 100%;
+    /* max-width: 100%; */
     text-align: center;
 }
 

@@ -333,9 +333,9 @@ export default function Order() {
     ) : order && order?.id !== -1 ? (
       <div className={styles.container}>
         <div
-          className={`${styles.orderGrid} ${order?.po_type_id == 2 ? "" : styles.orderGrid_a}`}
+          className={`${styles.orderGrid} ${order?.po_type_id == 2 ? styles.orderGrid_b : styles.orderGrid_a}`}
         >
-          <OrderGridCell gridArea="a" title="Overview">
+          <OrderGridCell gridArea={"a"} title="Overview">
             <OverviewGridData
               key={order.id}
               order={order}
@@ -346,7 +346,10 @@ export default function Order() {
             />
           </OrderGridCell>
 
-          <OrderGridCell gridArea="d" title="Materials">
+
+          {
+            order.po_type_id==1 ? <>
+          <OrderGridCell gridArea={"d"} title="Materials">
             <MaterialsGridData
               key={order.id}
               order={order}
@@ -355,7 +358,7 @@ export default function Order() {
               saveMode={saveMode}
             />
           </OrderGridCell>
-
+            
           <OrderGridCell gridArea={"e"} title={"Materials Dispatches"}>
             <MaterialsDispatchesGridData
               key={order.id}
@@ -365,27 +368,7 @@ export default function Order() {
               saveMode={saveMode}
             />
           </OrderGridCell>
-
-          {order?.po_type_id == 2 && (
-            <OrderGridCell gridArea={"b"} title={"Services"}>
-              <ServiceGridData
-                key={order.id}
-                order={order}
-                editMode={editMode}
-                saveMode={saveMode}
-                formatDate={formatDate}
-              />
-            </OrderGridCell>
-          )}
-          <OrderGridCell gridArea={"c"} title={"Payment Terms & Conditions"}>
-            <PaymentTCGridData
-              key={order.id}
-              order={order}
-              editMode={editMode}
-              saveMode={saveMode}
-            />
-          </OrderGridCell>
-
+            
           <OrderGridCell gridArea={"f"} title={"Hardware"}>
             <HardwareGridData
               key={order.id}
@@ -424,6 +407,31 @@ export default function Order() {
               />
             </SoftwareGridData>
           </OrderGridCell>
+            </> : <>
+            
+            <OrderGridCell gridArea={"b"} title={"Services"}>
+              <ServiceGridData
+                key={order.id}
+                order={order}
+                editMode={editMode}
+                saveMode={saveMode}
+                formatDate={formatDate}
+              />
+            </OrderGridCell>
+            
+            </>
+          }
+
+
+          <OrderGridCell gridArea={"c"} title={"Payment Terms & Conditions"}>
+            <PaymentTCGridData
+              key={order.id}
+              order={order}
+              editMode={editMode}
+              saveMode={saveMode}
+            />
+          </OrderGridCell>
+
         </div>
       </div>
     ) : (

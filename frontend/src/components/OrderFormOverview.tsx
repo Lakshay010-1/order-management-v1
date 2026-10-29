@@ -11,13 +11,6 @@ const overviewKeys = [
   { name: "Status", type: "select", key: "status", required: true },
 ];
 
-const total_service_key = {
-  name: "Total Services",
-  type: "number",
-  key: "total_services",
-  required: true,
-};
-
 export default function OrderFormOverview({
   order,
   partiesOptions,
@@ -66,7 +59,10 @@ export default function OrderFormOverview({
   }
 
   return (
-    <div className={styles.overviewDetails}>
+    <div
+      style={{ gridTemplateRows: `repeat(${overviewKeys.length + 1},auto)` }}
+      className={styles.overviewDetails}
+    >
       {overviewKeys.map((field, fieldIdx) => {
         const { type, name, key } = field;
         let selectedOption = {},
@@ -92,6 +88,7 @@ export default function OrderFormOverview({
               {name}
               <span className="text-red-600">{field?.required && "*"}</span>
             </p>
+            <p>:</p>
             {type === "select" ? (
               <BasicSelect
                 key={fieldIdx}
@@ -114,28 +111,6 @@ export default function OrderFormOverview({
                 }
               />
             )}
-            <>
-              {key == "po_type" && order.po_type_id == 2 && (
-                <>
-                  <p>
-                    {total_service_key.name}
-                    <span className="text-red-600">
-                      {total_service_key?.required && "*"}
-                    </span>
-                  </p>
-                  <input
-                    type={total_service_key.type}
-                    min={0}
-                    value={order[key]}
-                    onChange={(e) =>
-                      handleChange((prev) => {
-                        return { ...prev, [key]: e.target.value };
-                      })
-                    }
-                  />
-                </>
-              )}
-            </>
           </React.Fragment>
         );
       })}

@@ -12,10 +12,10 @@ interface record {
 }
 
 const overviewData: Array<Record<string, string | boolean>> = [
-  { name: "Party", key: "party", type: "select", required: true },
-  { name: "PO Date", key: "po_date", type: "date", required: true },
   { name: "PO Number", key: "po_number", type: "number", required: true },
+  { name: "PO Date", key: "po_date", type: "date", required: true },
   { name: "PO Type", key: "po_type", type: "select", required: true },
+  { name: "Party", key: "party", type: "select", required: true },
   { name: "Status", key: "status", type: "select", required: true },
 ];
 export default function OverviewGridData({
