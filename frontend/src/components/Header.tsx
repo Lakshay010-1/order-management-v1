@@ -30,31 +30,33 @@ export default function Header() {
           )}
         </div>
       </div>
-      {is_verified ? (
-        <div className={styles.headerPages}>
-          <NavLink to="/orders">
-            <div className={styles.headerPage}>
-              <BackupTableTwoToneIcon />
-              <h3>Orders</h3>
-            </div>
-          </NavLink>
-          <NavLink to="/parties">
-            <div className={styles.headerPage}>
-              <BusinessIcon />
-              <h3>Parties</h3>
-            </div>
-          </NavLink>
-          <NavLink to="/items">
-            <div className={styles.headerPage}>
-              <BarcodeReaderIcon />
-              <h3>Items</h3>
-            </div>
-          </NavLink>
-          <Profile />
-        </div>
-      ) : (
-        <h1>{!userAuthStatus ? "Register" : "Login"}</h1>
-      )}
+      <div className={styles.navItems}>
+        {is_verified ? (
+          <div className={styles.headerPages}>
+            <NavLink to="/orders">
+              <div className={styles.headerPage}>
+                <BackupTableTwoToneIcon />
+                <h3>Orders</h3>
+              </div>
+            </NavLink>
+            <NavLink to="/parties">
+              <div className={styles.headerPage}>
+                <BusinessIcon />
+                <h3>Parties</h3>
+              </div>
+            </NavLink>
+            <NavLink to="/items">
+              <div className={styles.headerPage}>
+                <BarcodeReaderIcon />
+                <h3>Items</h3>
+              </div>
+            </NavLink>
+            <Profile />
+          </div>
+        ) : (
+          <h1>{!userAuthStatus ? "Register" : "Login"}</h1>
+        )}
+      </div>
     </header>
   );
 }

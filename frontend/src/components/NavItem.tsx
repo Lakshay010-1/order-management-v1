@@ -11,7 +11,7 @@ export default function NavItem({
   item: string;
   navItemSelected: string;
   itemCount: number;
-  showCount: boolean;
+  showCount?: boolean;
   handleClick: (item: string) => void;
 }) {
   return (

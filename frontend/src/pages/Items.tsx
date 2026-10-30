@@ -23,6 +23,7 @@ export default function Items() {
     items,
     loading: itemsLoading,
     error: itemsError,
+    initialized: itemsInitialized,
   } = useAppSelector((state) => state.items);
   const dispatch = useAppDispatch();
 
@@ -58,7 +59,7 @@ export default function Items() {
     if (!itemsLoading) {
       if (itemsError) {
         setItemsMsg(itemsError);
-      } else if (items.length == 0) {
+      } else if (!itemsInitialized) {
         setItemsMsg("Fetching Items");
         dispatch(fetchItems());
       }
@@ -74,6 +75,7 @@ export default function Items() {
       <BasicTable
         fields={fields}
         data={items}
+        requiredFields={{ item: true }}
         intialState={{
           item: "",
         }}

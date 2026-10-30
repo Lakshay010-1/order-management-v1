@@ -13,6 +13,33 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AlertDialog from "./AlertDialog";
 
+const fields_a = [
+  { name: "Order ID", key: "id", type: "text" },
+  { name: "PO Number", key: "po_number", type: "text" },
+  { name: "PO Type", key: "po_type", type: "text" },
+  { name: "PO Date", key: "po_date", type: "date" },
+  { name: "Party", key: "party", type: "text" },
+  { name: "Status", key: "status", type: "text" },
+];
+
+const fields_hardware = [
+  { name: "Order", key: "", type: "date" },
+  {
+    name: "Expected Installation",
+    key: "hardware_installation_expected_date",
+    type: "date",
+  },
+  { name: " Installation", key: "hardware_installation_date", type: "date" },
+];
+const fields_software = [
+  {
+    name: "Expected Installation",
+    key: "software_installation_expected_date",
+    type: "date",
+  },
+  { name: " Installation", key: "software_installation_date", type: "date" },
+];
+
 function Row(props: {
   onRow: number | null;
   row: Order;
@@ -41,49 +68,51 @@ function Row(props: {
         onClick={() => props.onClick(row.id)}
         sx={{ "& > .MuiTableCell-root": { borderBottom: "unset" } }}
       >
-        <TableCell align="left">{row.id}</TableCell>
-        <TableCell align="left">{row.po_number}</TableCell>
-        <TableCell align="left">{row.po_type}</TableCell>
-        <TableCell align="center">
-          {new Date(row.po_date).toLocaleDateString("en-GB")}
-        </TableCell>
-        <TableCell component="th" scope="row">
-          {row.party}
-        </TableCell>
-        <TableCell align="center">{row.status}</TableCell>
-        <TableCell align="center">
-          {!row?.materials || row.materials.length == 0
-            ? "-"
-            : new Date(row.materials[0].order_date).toLocaleDateString("en-GB")}
-        </TableCell>
-        <TableCell align="center">
-          {!row.hardware_installation_expected_date
-            ? "-"
-            : (new Date(
-                row.hardware_installation_expected_date,
-              ).toLocaleDateString("en-GB") ?? "-")}
-        </TableCell>
-        <TableCell align="center">
-          {row?.hardware_installation_date
-            ? new Date(row.hardware_installation_date).toLocaleDateString(
-                "en-GB",
-              )
-            : "-"}
-        </TableCell>
-        <TableCell align="center">
-          {!row.software_installation_expected_date
-            ? "-"
-            : (new Date(
-                row.software_installation_expected_date,
-              ).toLocaleDateString("en-GB") ?? "-")}
-        </TableCell>
-        <TableCell align="center">
-          {row?.software_installation_date
-            ? new Date(row.software_installation_date).toLocaleDateString(
-                "en-GB",
-              )
-            : "-"}
-        </TableCell>
+        {fields_a.map((field, idx) => {
+          const { key, type } = field;
+          let data = row[key];
+          data = !data ? "-" : data;
+          data =
+            data != "-" && type == "date"
+              ? new Date(data).toLocaleDateString("en-GB")
+              : data;
+          return (
+            <TableCell key={idx} align="left">
+              {data}
+            </TableCell>
+          );
+        })}
+        {fields_hardware.map((field, idx) => {
+          const { key, type } = field;
+          let data = key ? row[key] : "";
+          if (!key && row["materials"] && row.materials.length != 0) {
+            data = row.materials[0].order_date;
+          }
+          data = !data ? "-" : data;
+          data =
+            data != "-" && type == "date"
+              ? new Date(data).toLocaleDateString("en-GB")
+              : data;
+          return (
+            <TableCell align="center" key={idx}>
+              {data}
+            </TableCell>
+          );
+        })}
+        {fields_software.map((field, idx) => {
+          const { key, type } = field;
+          let data = key ? row[key] : "";
+          data = !data ? "-" : data;
+          data =
+            data != "-" && type == "date"
+              ? new Date(data).toLocaleDateString("en-GB")
+              : data;
+          return (
+            <TableCell align="center" key={idx}>
+              {data}
+            </TableCell>
+          );
+        })}
         <TableCell>
           <button
             type="button"
@@ -98,12 +127,15 @@ function Row(props: {
     </React.Fragment>
   );
 }
+
 export default function CollapsibleTable({
   orders,
   handleDelete,
+  handleOrdersSort,
 }: {
   orders: Array<Order>;
   handleDelete: (id: number) => void;
+  handleOrdersSort: (key: string) => void;
 }) {
   const [onRow, setOnRow] = React.useState(null);
   const [orderDeleteId, setOrderDeleteId] = React.useState(-1);
@@ -153,28 +185,22 @@ export default function CollapsibleTable({
         <Table aria-label="collapsible table">
           <TableHead style={{ backgroundColor: "#d0d8e1" }}>
             <TableRow>
-              <TableCell rowSpan={2} align="left">
-                Order Id
-              </TableCell>
-              <TableCell rowSpan={2} align="left">
-                PO Number
-              </TableCell>
-              <TableCell rowSpan={2} align="left">
-                PO Type
-              </TableCell>
-              <TableCell rowSpan={2} align="center">
-                PO Date
-              </TableCell>
-              <TableCell rowSpan={2}>Party</TableCell>
-              <TableCell rowSpan={2} align="center">
-                Status
-              </TableCell>
+              {fields_a.map((field, idx) => (
+                <TableCell
+                  className={`${styles.fieldTableCell} ${styles.horizontalBorderss}`}
+                  key={idx}
+                  rowSpan={2}
+                  align="left"
+                  onClick={() => handleOrdersSort(field.key)}
+                >
+                  {field.name}
+                </TableCell>
+              ))}
               <TableCell
                 colSpan={3}
+                align="center"
+                className={styles.horizontalBorders}
                 style={{
-                  textAlign: "center",
-                  borderStyle: "none solid",
-                  borderColor: "grey",
                   borderWidth: "0 1px",
                 }}
               >
@@ -182,10 +208,9 @@ export default function CollapsibleTable({
               </TableCell>
               <TableCell
                 colSpan={2}
+                align="center"
+                className={styles.horizontalBorders}
                 style={{
-                  textAlign: "center",
-                  borderStyle: "none solid",
-                  borderColor: "grey",
                   borderWidth: "0 1px",
                 }}
               >
@@ -206,52 +231,33 @@ export default function CollapsibleTable({
                 </button>
               </TableCell>
             </TableRow>
+
             <TableRow>
-              {/* {Array.from({ length: 6 }, (_, idx) => (
-                <TableCell key={idx} />
-              ))} */}
-              <TableCell
-                align="center"
-                style={{
-                  borderLeftStyle: "solid",
-                  borderColor: "grey",
-                  borderWidth: "0 1px",
-                }}
-              >
-                Order
-              </TableCell>
-              <TableCell align="center">Expected Installation</TableCell>
-              <TableCell
-                align="center"
-                style={{
-                  borderRightStyle: "solid",
-                  borderColor: "grey",
-                  borderWidth: "0 1px",
-                }}
-              >
-                Installation
-              </TableCell>
-              <TableCell
-                align="center"
-                style={{
-                  borderLeftStyle: "solid",
-                  borderColor: "grey",
-                  borderWidth: "0 1px",
-                }}
-              >
-                Expected Installation
-              </TableCell>
-              <TableCell
-                align="center"
-                style={{
-                  borderRightStyle: "solid",
-                  borderColor: "grey",
-                  borderWidth: "0 1px",
-                }}
-              >
-                Installation
-              </TableCell>
-              {/* <TableCell /> */}
+              {fields_hardware.map((field, idx) => (
+                <TableCell
+                  key={idx}
+                  align="center"
+                  className={`${idx == 0 ? styles.leftBorder : idx == fields_hardware.length - 1 ? styles.rightBorder : ""}`}
+                  style={{
+                    borderWidth: "0 1px",
+                  }}
+                >
+                  {field.name}
+                </TableCell>
+              ))}
+
+              {fields_software.map((field, idx) => (
+                <TableCell
+                  key={idx}
+                  align="center"
+                  style={{
+                    borderWidth: "0 1px",
+                  }}
+                  className={`${idx == 0 ? styles.leftBorder : idx == fields_software.length - 1 ? styles.rightBorder : ""}`}
+                >
+                  {field.name}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>

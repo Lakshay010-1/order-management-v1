@@ -27,7 +27,7 @@ export default function NavItems({
       {items.map((item, idx) => {
         const itemCount =
           category == "Time"
-            ? ''
+            ? ""
             : orders.length > 0
               ? orders.filter((order) => order[category.toLowerCase()] === item)
                   .length
@@ -37,6 +37,7 @@ export default function NavItems({
             key={idx}
             item={item}
             itemCount={itemCount}
+            showCount={category != "Time"}
             handleClick={handleClick}
             navItemSelected={navItemSelected}
           />

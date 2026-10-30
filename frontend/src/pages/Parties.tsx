@@ -29,6 +29,7 @@ export default function Parties() {
     parties,
     loading: partiesLoading,
     error: partiesError,
+    initialized: partiesInitialized,
   } = useAppSelector((state) => state.parties);
   const dispatch = useAppDispatch();
 
@@ -49,8 +50,6 @@ export default function Parties() {
 
   function handleUpdate(id: number, updatedData: Party) {
     dispatch(updateParty({ id, details: updatedData }));
-    // dispatch();
-    // dispatch(partyUpdate({ id, details }));
   }
 
   function handleDecision(decision: boolean) {
@@ -64,7 +63,7 @@ export default function Parties() {
     setOpenDialog(true);
     setOrderDeleteId(id);
     setdialogMsg(
-      `Click \n 'DELETE' to proceed to delete party and all party's associated orders with the party\nOR\n'CANCEL' to cancel the operation`,
+      `Click \n 'DELETE' to proceed to delete party and all it's associated orders\nOR\n'CANCEL' to cancel the operation`,
     );
     setdialogTitle(`Delete Party:${id}`);
     // dispatch(partyDelete(id));
@@ -74,7 +73,7 @@ export default function Parties() {
     if (!partiesLoading) {
       if (partiesError) {
         setPartiesMsg(partiesError);
-      } else if (parties.length == 0) {
+      } else if (!partiesInitialized) {
         setPartiesMsg("Fetching Parties");
         dispatch(fetchParties());
       }
@@ -90,6 +89,7 @@ export default function Parties() {
       <BasicTable
         fields={fields}
         data={parties}
+        requiredFields={{ party: true }}
         intialState={{
           party: "",
           contact_person: "",

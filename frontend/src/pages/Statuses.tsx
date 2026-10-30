@@ -39,6 +39,7 @@ export default function Statuses() {
     <BasicTable
       fields={["id", "status", "created_at"]}
       data={statuses}
+      requiredFields={{ status: true }}
       initialState={{ status: "" }}
       handleDelete={handleDelete}
       handleUpdate={handleUpdate}

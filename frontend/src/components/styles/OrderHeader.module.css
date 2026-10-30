@@ -30,13 +30,37 @@
 .content {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: start;
 }
 
 .header a {
     color: black;
 }
 
+.navItems {
+    display: flex;
+    align-items: center;
+}
+
 
 .header a:hover {
     text-decoration: none;
+}
+
+@media (max-width:768px) {
+    .header {
+        flex-direction: column;
+    }
+
+    .navItems {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width:475px) {
+    .headerPages {
+        flex-wrap: wrap;
+        justify-content: end;
+    }
 }

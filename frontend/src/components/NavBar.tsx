@@ -23,7 +23,7 @@ export default function NavBar(props: {
   const [clickedItem, setClickedItem] = useState("All");
 
   useEffect(() => {
-    if (category.id == 2) {
+    if (clickedItem != "All" && category.id == 2) {
       return;
     }
     props.setSortOrdersBy({ type: category.value, value: clickedItem });

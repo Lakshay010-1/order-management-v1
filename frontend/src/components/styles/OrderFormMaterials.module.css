@@ -9,6 +9,7 @@
     display: grid;
     grid-auto-flow: row;
     grid-template-columns: repeat(6, auto);
+    overflow-x: scroll;
 }
 
 .keyOne {

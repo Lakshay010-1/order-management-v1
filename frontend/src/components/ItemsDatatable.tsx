@@ -23,10 +23,12 @@ export default function BasicTable<T>({
   intialState,
   handleDelete,
   handleAdd,
+  requiredFields,
 }: {
   fields: Array<string>;
   data: Array<T>;
   intialState: Partial<T>;
+  requiredFields?: Object;
 
   // Called when an edited row is saved.
   handleUpdate: (id: number, updatedData: T) => void;
@@ -38,6 +40,7 @@ export default function BasicTable<T>({
 }) {
   const [addRow, setAddRow] = useState<boolean>(false);
   const [updateRow, setUpdateRow] = useState<number | null>(null);
+  const [error, setError] = useState(false);
 
   const [tempDataUnit, setTempDataUnit] = useState<Partial<T>>(() => ({
     ...intialState,
@@ -77,6 +80,17 @@ export default function BasicTable<T>({
 
   function handleAddConfirm() {
     if (!handleAdd) return;
+    let isError = false;
+    for (const field of fields) {
+      if (requiredFields && requiredFields[field] && !tempDataUnit[field]) {
+        isError = true;
+        setError(true);
+        return;
+      }
+    }
+    if (isError) {
+      return;
+    }
 
     handleAdd({ ...tempDataUnit } as T);
 
@@ -125,6 +139,9 @@ export default function BasicTable<T>({
               {fields.map((field) => (
                 <TableCell align="center" key={field}>
                   {field}
+                  {requiredFields && (requiredFields[field] ?? false) && (
+                    <span className="text-red-600">*</span>
+                  )}
                 </TableCell>
               ))}
 
@@ -150,6 +167,15 @@ export default function BasicTable<T>({
                   <TableCell align="center" key={field} style={{ padding: 0 }}>
                     {field !== "id" && field !== "created_at" && (
                       <input
+                        style={
+                          error &&
+                          requiredFields &&
+                          (requiredFields[field] ?? false)
+                            ? {
+                                border: "1px solid red",
+                              }
+                            : {}
+                        }
                         placeholder={field}
                         name={field}
                         value={getInputValue(tempDataUnit, field)}

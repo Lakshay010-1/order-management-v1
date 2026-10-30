@@ -76,3 +76,30 @@ input:disabled {
     font-size: small;
     color: var(--color-03);
 }
+
+
+@media (max-width:1024px) {
+    .orderGrid_a {
+        grid-template-areas: "a a c c" "d d e e" "f f g g";
+    }
+
+}
+
+@media (max-width:768px) {
+    .orderGrid_a {
+        grid-template-areas: "a a c c" "d d d d" "e e e e" "f f g g";
+    }
+
+    .orderGrid_b {
+        grid-template-areas: "a" "b" "c";
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width:425px) {
+    .orderGrid_a {
+        grid-template-areas: "a" "c" "d" "e" "f" "g";
+        grid-template-columns: 1fr;
+    }
+}

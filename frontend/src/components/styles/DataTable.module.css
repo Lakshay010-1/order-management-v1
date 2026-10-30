@@ -37,3 +37,31 @@
 .red {
     background-color: red;
 }
+
+
+.horizontalBorders {
+    border-style: none solid;
+    border-color: grey;
+    border-width: 0 1px,
+}
+
+.leftBorder {
+    border-left-style: solid;
+    border-color: grey;
+    border-width: 0 1px,
+}
+
+.rightBorder {
+    border-right-style: solid;
+    border-color: grey;
+    border-width: 0 1px,
+}
+
+.fieldCell {
+    color: black;
+}
+
+.fieldTableCell:hover {
+    text-decoration: underline;
+    background-color: #c3cedb;
+}

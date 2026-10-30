@@ -17,6 +17,10 @@ export default function Dashboard() {
     error,
   } = useAppSelector((state) => state.orders);
   const [sortedOrders, setSortedOrders] = useState<Array<Order>>([]);
+  const [ordersSortConfig, setOrdersSortConfig] = useState({
+    key: "id",
+    order: "asc",
+  });
   const [message, setMessage] = useState("");
   const [sortOrdersBy, setSortOrdersBy] = useState<{
     type: string;
@@ -84,6 +88,24 @@ export default function Dashboard() {
     dispatch(removeOrder(id));
   }
 
+  function handleOrdersSort(key: string) {
+    const { key: ordersSortKey, order: ordersSortOrder } = ordersSortConfig;
+    const direction =
+      ordersSortKey == key && ordersSortOrder == "asc" ? "desc" : "asc";
+    setOrdersSortConfig({ key, order: direction });
+
+    setSortedOrders((prev) => {
+      const sortedOs = [...prev].sort((a, b) => {
+        // return a[key] - b[key];
+        const aVal = a[key],
+          bVal = b[key];
+        const result = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+        return direction == "asc" ? result : -result;
+      });
+      return sortedOs;
+    });
+  }
+
   return (
     <div className={styles.container}>
       <NavBar setSortOrdersBy={setSortOrdersBy} />
@@ -94,7 +116,11 @@ export default function Dashboard() {
           {message ? (
             <h1>{message}</h1>
           ) : (
-            <DataTable orders={sortedOrders} handleDelete={handleDelete} />
+            <DataTable
+              orders={sortedOrders}
+              handleOrdersSort={handleOrdersSort}
+              handleDelete={handleDelete}
+            />
           )}
         </>
       )}
