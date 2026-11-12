@@ -3,15 +3,9 @@ import styles from "./styles/OrderFormOverview.module.css";
 import type { NewOrder_a } from "../types/Order";
 import BasicSelect from "./Select";
 
-const overviewKeys = [
-  { name: "PO Number", type: "number", key: "po_number", required: true },
-  { name: "PO Date", type: "date", key: "po_date", required: true },
-  { name: "PO Type", type: "select", key: "po_type", required: true },
-  { name: "Party", type: "select", key: "party", required: true },
-  { name: "Status", type: "select", key: "status", required: true },
-];
-
 export default function OrderFormOverview({
+  fields,
+  fieldError,
   order,
   partiesOptions,
   statusesOptions,
@@ -19,6 +13,13 @@ export default function OrderFormOverview({
   handleChange,
   formatDate,
 }: {
+  fields: Array<{
+    name: string;
+    type: string;
+    key: string;
+    required?: boolean;
+  }>;
+  fieldError: boolean;
   order: NewOrder_a;
   partiesOptions: Array<{ id: number; value: string }>;
   poTypesOptions: Array<{ id: number; value: string }>;
@@ -26,7 +27,7 @@ export default function OrderFormOverview({
   handleChange: (value) => void;
   formatDate: (val: any) => string;
 }) {
-  const selectedOptionInitialState = { id: -1, value: "" };
+  const selectedOptionInitialState = { id: "", value: "" };
 
   const [selectedParty, setSelectedParty] = useState(
     selectedOptionInitialState,
@@ -34,9 +35,7 @@ export default function OrderFormOverview({
   const [selectedStatus, setSelectedStatus] = useState(
     selectedOptionInitialState,
   );
-  const [selectedPoType, setSelectedPoType] = useState(
-    selectedOptionInitialState,
-  );
+  const [selectedPoType, setSelectedPoType] = useState({ id: 1, value: "" });
 
   function handlePoTypeOptionChange(po_type_id: number) {
     handleChange((prev) => {
@@ -60,10 +59,10 @@ export default function OrderFormOverview({
 
   return (
     <div
-      style={{ gridTemplateRows: `repeat(${overviewKeys.length + 1},auto)` }}
+      style={{ gridTemplateRows: `repeat(${fields.length + 1},auto)` }}
       className={styles.overviewDetails}
     >
-      {overviewKeys.map((field, fieldIdx) => {
+      {fields.map((field, fieldIdx) => {
         const { type, name, key } = field;
         let selectedOption = {},
           options = [],
@@ -84,21 +83,31 @@ export default function OrderFormOverview({
 
         return (
           <React.Fragment key={fieldIdx}>
-            <p key={key + "p"} className="keyOne">
+            <p key={key + "p"} className={styles.keyOne}>
               {name}
               <span className="text-red-600">{field?.required && "*"}</span>
             </p>
             <p>:</p>
             {type === "select" ? (
               <BasicSelect
+                className={styles.valueOne}
                 key={fieldIdx}
                 options={options}
                 selectedOption={selectedOption}
                 handleOptionChange={handleOptionChangeFn}
+                required={fieldError && field?.required && !selectedOption.id}
               />
             ) : (
               <input
                 key={fieldIdx}
+                className={styles.valueOne}
+                style={
+                  fieldError && field?.required && !order[key]
+                    ? {
+                        border: "1px solid red",
+                      }
+                    : {}
+                }
                 {...(type == "number" && { min: 0 })}
                 type={type}
                 value={type == "date" ? formatDate(order[key]) : order[key]}

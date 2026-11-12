@@ -24,7 +24,7 @@ const itemsKeys = [
 ];
 
 const addDataInitialState = {
-  item: { id: -1, value: "" },
+  item: { id: "", value: "" },
   quantity: 0,
   date: new Date().toISOString().split("T")[0],
 };

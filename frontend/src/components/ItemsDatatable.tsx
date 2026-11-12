@@ -6,7 +6,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "./styles/ItemsDatatable.module.css";
 
@@ -24,11 +24,13 @@ export default function BasicTable<T>({
   handleDelete,
   handleAdd,
   requiredFields,
+  focusFieldTo,
 }: {
   fields: Array<string>;
   data: Array<T>;
   intialState: Partial<T>;
   requiredFields?: Object;
+  focusFieldTo: string;
 
   // Called when an edited row is saved.
   handleUpdate: (id: number, updatedData: T) => void;
@@ -41,6 +43,7 @@ export default function BasicTable<T>({
   const [addRow, setAddRow] = useState<boolean>(false);
   const [updateRow, setUpdateRow] = useState<number | null>(null);
   const [error, setError] = useState(false);
+  const focusFieldRef = useRef<HTMLInputElement | null>(null);
 
   const [tempDataUnit, setTempDataUnit] = useState<Partial<T>>(() => ({
     ...intialState,
@@ -130,6 +133,12 @@ export default function BasicTable<T>({
     setUpdateRow(null);
   }
 
+  useEffect(() => {
+    if (focusFieldRef) {
+      focusFieldRef.current?.focus();
+    }
+  }, [focusFieldRef]);
+
   return (
     <div className={styles.container}>
       <TableContainer component={Paper}>
@@ -163,29 +172,42 @@ export default function BasicTable<T>({
           <TableBody>
             {addRow && (
               <TableRow>
-                {fields.map((field) => (
-                  <TableCell align="center" key={field} style={{ padding: 0 }}>
-                    {field !== "id" && field !== "created_at" && (
-                      <input
-                        style={
-                          error &&
-                          requiredFields &&
-                          (requiredFields[field] ?? false)
-                            ? {
-                                border: "1px solid red",
-                              }
-                            : {}
-                        }
-                        placeholder={field}
-                        name={field}
-                        value={getInputValue(tempDataUnit, field)}
-                        onChange={(e) =>
-                          handleFieldChange(field, e.target.value)
-                        }
-                      />
-                    )}
-                  </TableCell>
-                ))}
+                {fields.map((field) => {
+                  return (
+                    <TableCell
+                      align="center"
+                      key={field}
+                      style={{ padding: 0 }}
+                    >
+                      {field !== "id" && field !== "created_at" && (
+                        <input
+                          className={styles.valueOne}
+                          ref={(el) => {
+                            if (el && focusFieldTo === field) {
+                              el.focus();
+                            }
+                          }}
+                          // ref={focusFieldTo === field ? focusFieldRef : null}
+                          style={
+                            error &&
+                            requiredFields &&
+                            (requiredFields[field] ?? false)
+                              ? {
+                                  border: "1px solid red",
+                                }
+                              : {}
+                          }
+                          placeholder={field}
+                          name={field}
+                          value={getInputValue(tempDataUnit, field)}
+                          onChange={(e) =>
+                            handleFieldChange(field, e.target.value)
+                          }
+                        />
+                      )}
+                    </TableCell>
+                  );
+                })}
 
                 <TableCell>
                   <div className={styles.actionBtnContainer}>

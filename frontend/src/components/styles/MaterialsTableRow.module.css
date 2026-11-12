@@ -1,0 +1,115 @@
+.materialsDetails {
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(7, auto);
+    overflow-y: scroll;
+    max-height: 22rem;
+    padding-right: 0.5rem;
+}
+
+.keyOne {
+    font-size: larger;
+    margin: 0;
+    padding: 0 0.5rem;
+}
+
+.valueOne {
+    /* padding: 0 0.2rem; */
+    text-align: left;
+    text-align: center;
+    /* min-width: 0; */
+    /* width: 100%; */
+    /* max-width:fit-content; */
+    font-size: small;
+    max-width: max-content;
+    color: var(--color-03);
+    field-sizing: content;
+    min-width: fit-content;
+    max-width: 100%;
+    text-align: center;
+    padding: 1rem;
+    height: 100%;
+}
+
+
+.actionBtn {
+    border: 0;
+}
+
+.lightblueBg {
+    background-color: rgb(253, 253, 253);
+    background-color: rgb(255, 255, 0, 0.03);
+    background-color: rgba(1, 255, 255, 0.03);
+    color: rgb(0, 0, 25);
+    /* border-style: none solid;
+    border-color: rgb(51, 51, 51);
+    border-width: 0 1px, */
+}
+
+.green {
+    background-color: #B6F500;
+}
+
+
+.red {
+    background-color: red;
+    border: 1px black solid;
+}
+
+.blackRed {
+    background-color: black;
+    color: red;
+    border: 1px rgb(255, 100, 100) solid;
+}
+
+.lightgreen {
+    background-color: #e8ffa4;
+}
+
+
+.lightred {
+    background-color: rgb(248, 176, 176);
+    border: 1px rgb(172, 172, 172) solid;
+}
+
+.blackBg {
+    background-color: black;
+}
+
+.blue {
+    background-color: #2373F4;
+}
+
+.topBorder {
+    border-top-style: solid;
+    border-color: rgb(77, 77, 124);
+    border-radius: 1px;
+}
+
+.bottomBorder {
+    border-bottom-style: solid;
+    border-color: rgb(77, 77, 124);
+    border-radius: 1px;
+}
+
+.dispatchQuantities {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.dispatchQuantities h3 {
+    width: 30%;
+    text-align: center;
+}
+
+.dispatchbgColor {
+    background-color: rgba(188, 204, 220, 0.7);
+}
+
+@media (max-width:930px) {
+    .materialsDetails {}
+}

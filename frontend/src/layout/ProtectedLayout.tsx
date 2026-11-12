@@ -21,7 +21,7 @@ export default function ProtectedLayout() {
     return <Loader />;
   }
   if (!is_verified) {
-    return <Login />;
+    return <Login isRegistered={true} />;
   }
 
   return (

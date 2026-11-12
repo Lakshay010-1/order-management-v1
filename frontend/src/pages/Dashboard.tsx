@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./styles/Dashboard.module.css";
-import DataTable from "../components/OrdersTable";
+import OrdersTable from "../components/OrdersTable";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchOrders, removeOrder } from "../store/slices/ordersSlice";
 import NavBar from "../components/NavBar";
@@ -116,7 +116,7 @@ export default function Dashboard() {
           {message ? (
             <h1>{message}</h1>
           ) : (
-            <DataTable
+            <OrdersTable
               orders={sortedOrders}
               handleOrdersSort={handleOrdersSort}
               handleDelete={handleDelete}

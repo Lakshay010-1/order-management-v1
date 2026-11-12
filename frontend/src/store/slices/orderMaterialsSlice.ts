@@ -35,13 +35,7 @@ export const fetchorderMaterials = createAsyncThunk(
 
 export const insertOrderMaterial = createAsyncThunk(
   "orderMaterials/insertOrderMaterial",
-  async ({
-    order_id,
-    details,
-  }: {
-    order_id: number;
-    details: NewMaterial;
-  }) => {
+  async ({ order_id, details }: { order_id: number; details: NewMaterial }) => {
     return await addOrderMaterial(order_id, details);
   },
 );
@@ -55,7 +49,7 @@ export const updateOrderMaterial = createAsyncThunk(
   }: {
     order_id: number;
     material_id: number;
-    details:NewMaterial;
+    details: NewMaterial;
   }) => {
     return await putOrderMaterial(order_id, material_id, details);
   },
@@ -122,16 +116,17 @@ const orderMaterialsSlice = createSlice({
       // Update Order
       .addCase(updateOrderMaterial.pending, (state) => {
         state.error = null;
+        state.loading = true;
       })
       .addCase(updateOrderMaterial.fulfilled, (state, action) => {
         const { details, material_id } = action.meta.arg;
-        state.error = null;
-        state.loading = false;
         state.orderMaterials = updateData(
           material_id,
           details,
           state.orderMaterials,
         );
+        state.error = null;
+        state.loading = false;
       })
       .addCase(updateOrderMaterial.rejected, (state, action) => {
         state.error =
@@ -161,6 +156,6 @@ const orderMaterialsSlice = createSlice({
   },
 });
 
-export const {setOrderMaterialsInitializer} = orderMaterialsSlice.actions;
+export const { setOrderMaterialsInitializer } = orderMaterialsSlice.actions;
 
 export default orderMaterialsSlice.reducer;

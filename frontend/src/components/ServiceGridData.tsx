@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./styles/ServiceGridData.module.css";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -12,6 +12,8 @@ import {
   removeOrderService,
   updateOrderService,
 } from "../store/slices/orderServicesSlice";
+import { compareDates } from "../utils/compareDates";
+import type { OrderService } from "../types/OrderService";
 
 const serviceKeys = [
   {
@@ -20,15 +22,15 @@ const serviceKeys = [
     key: "id",
   },
   {
-    name: "Description",
-    type: "text",
-    key: "description",
-  },
-  {
     name: "Date",
     type: "date",
     key: "date",
     required: true,
+  },
+  {
+    name: "Description",
+    type: "text",
+    key: "description",
   },
 ];
 
@@ -43,11 +45,17 @@ export default function ServiceGridData({
   editMode,
   saveMode,
   formatDate,
+  orderServicesData,
+  setOrderServicesData,
+  fieldError,
 }: {
   order: any;
   editMode: boolean;
   formatDate: (val: any) => string;
   saveMode: boolean;
+  orderServicesData: Array<OrderService>;
+  setOrderServicesData: (val: any) => void;
+  fieldError: boolean;
 }) {
   const dispatch = useAppDispatch();
   const {
@@ -61,9 +69,11 @@ export default function ServiceGridData({
   const [addData, setAddData] = useState(addDataInitialState);
 
   const [error, setError] = useState(false);
+  const [doubleClickDelId, setDoubleClickDelId] = useState<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [tempServicesData, setTempServicesData] = useState([]);
-  const [orderServicesData, setOrderServicesData] = useState([]);
+  // const [orderServicesData, setOrderServicesData] = useState([]);
 
   function handleAddService() {
     const { description, date } = addData;
@@ -148,13 +158,13 @@ export default function ServiceGridData({
     >
       {serviceKeys.map((key) => (
         <p className={styles.keyOne} key={key.name}>
-          {key.name}
+          {key.key == "id" ? "S.No." : key.name}
           <span className="text-red-600">{key?.required && "*"}</span>
         </p>
       ))}
       <button
-        disabled={!editMode}
-        className={`${styles.actionBtn} ${editMode ? (add ? `${styles.red} ${styles.blackBg}` : styles.green) : styles.lightgreen}`}
+        disabled={editMode}
+        className={`${styles.actionBtn} ${!editMode ? (add ? `${styles.red} ${styles.blackBg}` : styles.green) : styles.lightgreen}`}
         onClick={() => setAdd((prev) => !prev)}
       >
         {!add ? <AddIcon /> : <CancelIcon style={{ color: "red" }} />}
@@ -163,8 +173,22 @@ export default function ServiceGridData({
         <>
           {serviceKeys.map((key, idx) => {
             const keyName = key.name.toLowerCase();
+            const val = addData[key.key];
+            const updatedValue =
+              key.type == "date" ? compareDates(order["po_date"], val) : val;
+
+            const minimumValue =
+              key.type == "date" ? formatDate(order["po_date"]) : 0;
+            const min =
+              key.type == "date" || key.type == "number"
+                ? { min: minimumValue }
+                : {};
+
+            addData[key.key] = updatedValue;
+
             return (
               <input
+                {...min}
                 style={
                   error && key?.required
                     ? {
@@ -203,22 +227,41 @@ export default function ServiceGridData({
       {orderServicesData.map((p_tc, idx) => {
         return (
           <React.Fragment key={idx}>
-            {serviceKeys.map((key, keysIdx) => {
-              const keyName = key.name.toLowerCase();
+            {serviceKeys.map((keyOb, keysIdx) => {
+              const { name, key, type, required } = keyOb;
+              const keyName = keyOb.name.toLowerCase();
+              const value = formatDate(p_tc[key]);
+              const updatedValue =
+                type == "date" ? compareDates(order["po_date"], value) : value;
+
+              const minimumValue =
+                type == "date" ? formatDate(order["po_date"]) : 0;
+              const min =
+                type == "date" || type == "number" ? { min: minimumValue } : {};
               return (
                 <input
+                  {...min}
+                  style={
+                    updatedValue != value
+                      ? {
+                          border: "1px solid red",
+                        }
+                      : {}
+                  }
                   key={keysIdx}
-                  readOnly={key.name == "Id"}
-                  disabled={!editMode || key.name == "Id"}
-                  type={key.type}
+                  readOnly={keyOb.name == "Id"}
+                  disabled={!editMode || keyOb.name == "Id"}
+                  type={keyOb.type}
                   name={keyName}
                   className={styles.valueOne}
                   value={
-                    key.type == "date"
-                      ? formatDate(p_tc[keyName])
-                      : key.key == "id"
+                    keyOb.type == "date"
+                      ? updatedValue != value
+                        ? value
+                        : updatedValue
+                      : keyOb.key == "id"
                         ? idx + 1
-                        : p_tc[keyName]
+                        : p_tc[key]
                   }
                   onChange={(e) =>
                     setOrderServicesData((prev) => {
@@ -238,9 +281,28 @@ export default function ServiceGridData({
               );
             })}
             <button
-              disabled={!editMode}
-              className={`${styles.actionBtn} ${editMode ? styles.red : styles.lightred}`}
-              onClick={() => handleDeleteService(p_tc.id)}
+              disabled={editMode}
+              className={`${styles.actionBtn} ${!editMode ? (doubleClickDelId == p_tc.id ? styles.blackRed : styles.red) : styles.lightred}`}
+              onClick={() => {
+                if (doubleClickDelId == p_tc.id) {
+                  if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                    timeoutRef.current = null;
+                  }
+                  setDoubleClickDelId(null);
+                  handleDeleteService(p_tc.id);
+                } else {
+                  if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                  }
+                  setDoubleClickDelId(p_tc.id);
+
+                  timeoutRef.current = setTimeout(() => {
+                    setDoubleClickDelId(null);
+                    timeoutRef.current = null;
+                  }, 1500);
+                }
+              }}
             >
               <DeleteIcon />
             </button>

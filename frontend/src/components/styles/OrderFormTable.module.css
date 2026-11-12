@@ -11,12 +11,13 @@
 }
 
 .valueOne {
+    padding: 0 0.2rem;
     text-align: left;
     text-align: center;
     font-size: small;
     color: var(--color-03);
     field-sizing: content;
-    min-width: 1ch;
+    min-width: fit-content;
     max-width: 100%;
     text-align: center;
 }

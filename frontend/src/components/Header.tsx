@@ -3,13 +3,14 @@ import styles from "./styles/OrderHeader.module.css";
 import Profile from "./Profile";
 import BackupTableTwoToneIcon from "@mui/icons-material/BackupTableTwoTone";
 import BarcodeReaderIcon from "@mui/icons-material/BarcodeReader";
+import AddIcon from "@mui/icons-material/Add";
 import BusinessIcon from "@mui/icons-material/Business";
 import { NavLink } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import logo from "../assets/images/logo.png";
 
 export default function Header() {
-  const { headerContent, userAuthStatus } = useAppSelector(
+  const { headerContent, userAuthStatus, headerErrorMessage } = useAppSelector(
     (state) => state.header,
   );
   const { is_verified } = useAppSelector((state) => state.auth);
@@ -26,13 +27,22 @@ export default function Header() {
           headerContent == "Items" ? (
             <h1>{headerContent}</h1>
           ) : (
-            <>{headerContent}</>
+            <h2>{headerContent}</h2>
           )}
         </div>
       </div>
-      <div className={styles.navItems}>
+      <>{headerErrorMessage && <p>{headerErrorMessage}</p>}</>
+      <div
+        className={`${styles.navItems} ${!is_verified && styles.justifyCenter}`}
+      >
         {is_verified ? (
           <div className={styles.headerPages}>
+            <NavLink to="/orders/new" className={styles.newOrderLink}>
+              <div className={`${styles.headerPage}`}>
+                <AddIcon />
+                <h3>New Order</h3>
+              </div>
+            </NavLink>
             <NavLink to="/orders">
               <div className={styles.headerPage}>
                 <BackupTableTwoToneIcon />
@@ -54,7 +64,7 @@ export default function Header() {
             <Profile />
           </div>
         ) : (
-          <h1>{!userAuthStatus ? "Register" : "Login"}</h1>
+          <>{!is_verified && <h1 className={styles.userUnVerifiedText}>Login</h1>}</>
         )}
       </div>
     </header>

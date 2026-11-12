@@ -82,6 +82,7 @@ export default function Items() {
         handleUpdate={handleUpdate}
         handleDelete={handleDelete}
         handleAdd={handleAdd}
+        focusFieldTo={"item"}
       />
 
       <AlertDialog

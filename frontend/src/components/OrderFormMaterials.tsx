@@ -1,17 +1,27 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import styles from "./styles/OrderFormMaterials.module.css";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CancelIcon from "@mui/icons-material/Cancel";
 import BasicSelect from "./Select";
+import { v4 as uuidV4 } from "uuid";
+import type { NewOrder_a } from "../types/Order";
+import { compareDates } from "../utils/compareDates";
+
+const minimumDates: Record<string, { date: string }> = {
+  purchase_date: { date: "order_date" },
+  deliver_date: { date: "purchase_date" },
+};
 
 export default function OrderFormMaterials({
+  order,
   fields,
   itemsOptions,
   orderMaterials,
   handleOrderMaterialsChange,
   formatDate,
 }: {
+  order: NewOrder_a;
   fields: Array<any>;
   itemsOptions: Array<{ id: number; value: string }>;
   orderMaterials: Array<any>;
@@ -19,18 +29,20 @@ export default function OrderFormMaterials({
   formatDate: (val: any) => string;
 }) {
   const addDataInitialState = {
-    item_id: -1,
+    item_id: "",
     quantity: 0,
-    order_date: "",
+    order_date: new Date().toISOString().split("T")[0],
     purchase_date: "",
     deliver_date: "",
   };
   const selectedOptionInitialState = {
-    id: -1,
+    id: "",
     value: "",
   };
   const [addData, setAddData] = useState(addDataInitialState);
   const [error, setError] = useState(false);
+  const [doubleClickDelId, setDoubleClickDelId] = useState<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [selectedItemOption, setSelectedItemOption] = useState(
     selectedOptionInitialState,
   );
@@ -69,7 +81,27 @@ export default function OrderFormMaterials({
         </button>
         {fields.map((field, fieldIdx) => {
           const { type, name, key } = field;
-          const minimumNumVal = type == "number" ? { min: 0 } : {};
+          const val = addData[key];
+          const minimumValue =
+            type == "date"
+              ? formatDate(
+                  Object.hasOwn(minimumDates, key)
+                    ? addData[minimumDates[key].date]
+                    : order["po_date"],
+                )
+              : 0;
+          const min =
+            type == "date" || type == "number" ? { min: minimumValue } : {};
+
+          const updatedValue =
+            type == "date"
+              ? Object.hasOwn(minimumDates, key)
+                ? compareDates(addData[minimumDates[key].date], val)
+                : compareDates(order["po_date"], val)
+              : val;
+
+          addData[key] = updatedValue;
+
           return key == "item_id" ? (
             <BasicSelect
               required={error}
@@ -87,12 +119,13 @@ export default function OrderFormMaterials({
                     }
                   : {}
               }
+              disabled={key == "deliver_date" && !addData["purchase_date"]}
               required={field?.required}
               key={fieldIdx + type}
               placeholder={name}
-              value={addData[key]}
+              value={updatedValue}
               type={type}
-              {...minimumNumVal}
+              {...min}
               onChange={(e) =>
                 setAddData((prev) => {
                   return {
@@ -123,10 +156,7 @@ export default function OrderFormMaterials({
             }
             setError(() => false);
             handleOrderMaterialsChange((prev) => {
-              const updatedOrderItems = [
-                ...prev,
-                { id: crypto.randomUUID(), ...addData },
-              ];
+              const updatedOrderItems = [...prev, { id: uuidV4(), ...addData }];
               clearSelections();
               return updatedOrderItems;
             });
@@ -141,27 +171,53 @@ export default function OrderFormMaterials({
               {fields.map((field, fieldIdx) => {
                 const { key, type, name } = field;
                 const value = oMat[key];
-                const minimumNumVal = type == "number" ? { min: 0 } : {};
+                const min =
+                  type == "date" || type == "number"
+                    ? {
+                        min:
+                          type == "date"
+                            ? formatDate(
+                                Object.hasOwn(minimumDates, key)
+                                  ? oMat[minimumDates[key].date]
+                                  : order["po_date"],
+                              )
+                            : 0,
+                      }
+                    : {};
+
                 const updatedValue =
                   type == "date"
-                    ? formatDate(value)
+                    ? Object.hasOwn(minimumDates, key)
+                      ? compareDates(oMat[minimumDates[key].date], value)
+                      : compareDates(order["po_date"], value)
                     : type == "select"
                       ? itemsOptions.filter((i) => i.id == oMat[key])[0]
                       : value;
+
                 return (
                   <input
-                    {...minimumNumVal}
+                    style={
+                      type != "select" && updatedValue != value
+                        ? { border: "1px solid red" }
+                        : {}
+                    }
+                    {...min}
                     key={fieldIdx + "input"}
                     type={type == "select" ? "text" : type}
-                    disabled={type == "select"}
+                    disabled={
+                      type == "select" ||
+                      (key == "deliver_date" && !oMat["purchase_date"])
+                    }
                     value={
                       type == "select"
                         ? updatedValue
                           ? updatedValue.value
                           : ""
-                        : updatedValue
+                        : updatedValue != value
+                          ? value
+                          : updatedValue
                     }
-                    className="valueOne"
+                    className={styles.valueOne}
                     onChange={(e) =>
                       handleOrderMaterialsChange((prev) => {
                         return prev.map((p) => {
@@ -176,12 +232,29 @@ export default function OrderFormMaterials({
                 );
               })}
               <button
-                className={`${styles.actionBtn} ${styles.red} ${styles.border1}`}
-                onClick={() =>
-                  handleOrderMaterialsChange((prev) => {
-                    return prev.filter((p) => p.id !== oMat.id);
-                  })
-                }
+                className={`${styles.actionBtn} ${doubleClickDelId == oMat.id ? styles.blackRed : styles.red}`}
+                onClick={() => {
+                  if (doubleClickDelId == oMat.id) {
+                    if (timeoutRef.current) {
+                      clearTimeout(timeoutRef.current);
+                      timeoutRef.current = null;
+                    }
+                    setDoubleClickDelId(null);
+                    handleOrderMaterialsChange((prev) => {
+                      return prev.filter((p) => p.id !== oMat.id);
+                    });
+                  } else {
+                    if (timeoutRef.current) {
+                      clearTimeout(timeoutRef.current);
+                    }
+                    setDoubleClickDelId(oMat.id);
+
+                    timeoutRef.current = setTimeout(() => {
+                      setDoubleClickDelId(null);
+                      timeoutRef.current = null;
+                    }, 1500);
+                  }
+                }}
               >
                 <DeleteIcon />
               </button>

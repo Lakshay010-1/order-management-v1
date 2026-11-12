@@ -1,5 +1,6 @@
 .container {
-    height: 19rem;
+    min-height: 10rem;
+    max-height: 20rem;
     padding-right: 0.5rem;
     overflow-y: scroll;
 }
@@ -8,8 +9,9 @@
 .materialsDetails {
     display: grid;
     grid-auto-flow: row;
-    grid-template-columns: repeat(6, auto);
-    overflow-x: scroll;
+    grid-template-columns: repeat(5, auto) max-content;
+    row-gap: 0.5rem;
+    /* overflow-x: scroll; */
 }
 
 .keyOne {
@@ -19,6 +21,7 @@
 }
 
 .valueOne {
+    padding: 0 0.2rem;
     text-align: left;
     text-align: center;
     /* min-width: 0; */
@@ -28,7 +31,7 @@
     max-width: max-content;
     color: var(--color-03);
     field-sizing: content;
-    min-width: 1ch;
+    min-width: fit-content;
     max-width: 100%;
     text-align: center;
 }
@@ -45,8 +48,21 @@
 
 .red {
     background-color: red;
+    border: 1px black solid;
 }
 
 .border1 {
     border: 1px black solid;
+}
+
+.blackRed {
+    background-color: black;
+    color: red;
+    border: 1px rgb(255, 100, 100) solid;
+}
+
+@media (max-width:930px) {
+    .materialsDetails {
+        font-size: small;
+    }
 }

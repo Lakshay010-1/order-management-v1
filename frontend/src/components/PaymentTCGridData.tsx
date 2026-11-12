@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./styles/PaymentTCGridData.module.css";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -12,9 +12,10 @@ import {
   removeOrderPaymentTC,
   updateOrderPaymentTC,
 } from "../store/slices/orderPaymentTCsSlice";
+import type { PaymentTC } from "../types/PaymentTC";
 
 const paymentTCkeys = [
-  { name: "Id", type: "number", key: "id" },
+  // { name: "Id", type: "number", key: "id" },
   { name: "Term", type: "text", key: "term", required: true },
   { name: "Fulfilled", type: "checkbox", key: "fulfilled" },
 ];
@@ -45,6 +46,8 @@ export default function PaymentTCGridData({
   const [addData, setAddData] = useState(addDataInitialState);
 
   const [error, setError] = useState(false);
+  const [doubleClickDelId, setDoubleClickDelId] = useState<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [tempPaymentTCsData, setTempPaymentTCsData] = useState([]);
   const [orderPaymentTCsData, setOrderPaymentTCsData] = useState([]);
@@ -75,7 +78,7 @@ export default function PaymentTCGridData({
 
   useEffect(() => {
     if (saveMode) {
-      orderPaymentTCsData.map((oPc) => {
+      orderPaymentTCsData.map((oPc: PaymentTC) => {
         dispatch(
           updateOrderPaymentTC({
             order_id: order.id,
@@ -105,19 +108,19 @@ export default function PaymentTCGridData({
     if (!orderPaymentTCsInitialized) {
       dispatch(fetchorderPaymentTCs(order.id));
     } else {
-      let currentPaymentTCs = orderPaymentTCsData;
-      const existingIds = new Set(currentPaymentTCs.map((ptc) => ptc.id));
-      const newPaymentTCsIds = new Set(orderPaymentTCs.map((ptc) => ptc.id));
-      const missingPaymentTCs = orderPaymentTCs.filter(
-        (item) => !existingIds.has(item.id),
-      );
+      // let currentPaymentTCs = orderPaymentTCsData;
+      // const existingIds = new Set(currentPaymentTCs.map((ptc) => ptc.id));
+      // const newPaymentTCsIds = new Set(orderPaymentTCs.map((ptc) => ptc.id));
+      // const missingPaymentTCs = orderPaymentTCs.filter(
+      //   (item) => !existingIds.has(item.id),
+      // );
 
-      currentPaymentTCs = currentPaymentTCs.filter((ptc) =>
-        newPaymentTCsIds.has(ptc.id),
-      );
-      const newUpdatedPaymentTCs = [...currentPaymentTCs, ...missingPaymentTCs];
-      setOrderPaymentTCsData(newUpdatedPaymentTCs);
-      setTempPaymentTCsData(newUpdatedPaymentTCs);
+      // currentPaymentTCs = currentPaymentTCs.filter((ptc) =>
+      //   newPaymentTCsIds.has(ptc.id),
+      // );
+      // const newUpdatedPaymentTCs = [...currentPaymentTCs, ...missingPaymentTCs];
+      setOrderPaymentTCsData(orderPaymentTCs);
+      setTempPaymentTCsData(orderPaymentTCs);
     }
   }, [orderPaymentTCsInitialized, order, orderPaymentTCs]);
 
@@ -127,9 +130,11 @@ export default function PaymentTCGridData({
     <div
       style={{
         gridTemplateRows: `repeat(${orderPaymentTCsData.length + 1},1fr)`,
+        maxHeight: `${order.po_type_id == 1 ? "22rem" : "95dvh"}`,
       }}
       className={styles.paymentstcsDetails}
     >
+      <p className={styles.keyOne}>S.No.</p>
       {paymentTCkeys.map((key) => (
         <p className={styles.keyOne} key={key.name}>
           {key.name}
@@ -137,14 +142,15 @@ export default function PaymentTCGridData({
         </p>
       ))}
       <button
-        disabled={!editMode}
-        className={`${styles.actionBtn} ${editMode ? (add ? `${styles.red} ${styles.blackBg}` : styles.green) : styles.lightgreen}`}
+        disabled={editMode}
+        className={`${styles.actionBtn} ${!editMode ? (add ? `${styles.red} ${styles.blackBg}` : styles.green) : styles.lightgreen}`}
         onClick={() => setAdd((prev) => !prev)}
       >
         {!add ? <AddIcon /> : <CancelIcon style={{ color: "red" }} />}
       </button>
       {add && (
         <>
+          <p></p>
           {paymentTCkeys.map((key, idx) => {
             const keyName = key.name.toLowerCase();
             // const val =
@@ -191,6 +197,7 @@ export default function PaymentTCGridData({
       {orderPaymentTCsData.map((p_tc, idx) => {
         return (
           <React.Fragment key={idx}>
+            <p>{idx + 1}</p>
             {paymentTCkeys.map((key, keysIdx) => {
               const keyName = key.name.toLowerCase();
               const value =
@@ -227,9 +234,28 @@ export default function PaymentTCGridData({
               );
             })}
             <button
-              disabled={!editMode}
-              className={`${styles.actionBtn} ${editMode ? styles.red : styles.lightred}`}
-              onClick={() => handleDeletePaymentTC(p_tc.id)}
+              disabled={editMode}
+              className={`${styles.actionBtn} ${!editMode ? (doubleClickDelId == p_tc.id ? styles.blackRed : styles.red) : styles.lightred}`}
+              onClick={() => {
+                if (doubleClickDelId == p_tc.id) {
+                  if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                    timeoutRef.current = null;
+                  }
+                  setDoubleClickDelId(null);
+                  handleDeletePaymentTC(p_tc.id);
+                } else {
+                  if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                  }
+                  setDoubleClickDelId(p_tc.id);
+
+                  timeoutRef.current = setTimeout(() => {
+                    setDoubleClickDelId(null);
+                    timeoutRef.current = null;
+                  }, 1500);
+                }
+              }}
             >
               <DeleteIcon />
             </button>

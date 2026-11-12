@@ -5,31 +5,29 @@ import BasicSelect from "./Select";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchParties } from "../store/slices/partySlice";
 import { fetchStatuses } from "../store/slices/statusSlice";
+import type { FieldKey } from "../types/FieldKey";
 
 interface record {
   id: number;
   value: string;
 }
 
-const overviewData: Array<Record<string, string | boolean>> = [
-  { name: "PO Number", key: "po_number", type: "number", required: true },
-  { name: "PO Date", key: "po_date", type: "date", required: true },
-  { name: "PO Type", key: "po_type", type: "select", required: true },
-  { name: "Party", key: "party", type: "select", required: true },
-  { name: "Status", key: "status", type: "select", required: true },
-];
 export default function OverviewGridData({
+  fields,
   order,
   updateOrder,
   editMode,
   saveMode,
   formatDate,
+  fieldError,
 }: {
+  fields: Array<FieldKey>;
   order: Order;
   updateOrder: (val: any) => void;
   editMode: boolean;
   saveMode: boolean;
   formatDate: (val: any) => string;
+  fieldError: boolean;
 }) {
   const dispatch = useAppDispatch();
   const { parties, initialized: partiesInitialized } = useAppSelector(
@@ -88,11 +86,11 @@ export default function OverviewGridData({
   return order ? (
     <div
       style={{
-        gridTemplateRows: `repeat(${overviewData.length + 1},auto)`,
+        gridTemplateRows: `repeat(${fields.length + 1},auto)`,
       }}
       className={styles.overviewDetails}
     >
-      {overviewData.map((data, idx) => {
+      {fields.map((data, idx) => {
         const field = data.key as keyof Order;
         const isDate = data.key.toLowerCase().includes("date");
         let value = order[field];
@@ -135,31 +133,76 @@ export default function OverviewGridData({
                 isDisabled={!editMode}
               />
             ) : (
-              <input
-                className={styles.valueOne}
-                disabled={!editMode}
-                key={data.key + "input"}
-                id={data.key}
-                name={data.key}
-                type={isDate ? "date" : "text"}
-                value={
-                  data.type == "date"
-                    ? formatDate(order[data.key])
-                    : order[data.key]
-                }
-                onChange={(e) =>
-                  updateOrder((prev) => {
-                    return {
-                      ...prev,
-                      [data.key.toLowerCase()]: e.target.value,
-                    };
-                  })
-                }
-              />
+              <>
+                <input
+                  style={
+                    fieldError && data?.required && !order[data.key]
+                      ? {
+                          border: "1px solid red",
+                        }
+                      : {}
+                  }
+                  className={styles.valueOne}
+                  disabled={!editMode || data.key == "po_type"}
+                  key={data.key + "input"}
+                  id={data.key}
+                  name={data.key}
+                  type={isDate ? "date" : "text"}
+                  value={
+                    data.type == "date"
+                      ? formatDate(order[data.key])
+                      : order[data.key]
+                  }
+                  onChange={(e) =>
+                    updateOrder((prev) => {
+                      return {
+                        ...prev,
+                        [data.key.toLowerCase()]:
+                          data.type == "date"
+                            ? formatDate(e.target.value)
+                            : e.target.value,
+                      };
+                    })
+                  }
+                />
+              </>
             )}
           </React.Fragment>
         );
       })}
+
+      {order.po_type_id == 2 && (
+        <>
+          <p className={styles.keyOne}>
+            Total Services
+            <span className="text-red-600">*</span>
+          </p>
+          <p>:</p>
+          <input
+            className={styles.valueOne}
+            style={
+              fieldError && !order["total_services"]
+                ? {
+                    border: "1px solid red",
+                  }
+                : {}
+            }
+            disabled={!editMode}
+            id="total_services"
+            name="total_services"
+            type="number"
+            value={order["total_services"]}
+            onChange={(e) =>
+              updateOrder((prev) => {
+                return {
+                  ...prev,
+                  total_services: e.target.value,
+                };
+              })
+            }
+          />
+        </>
+      )}
     </div>
   ) : (
     <h1>No Overview Data Found</h1>

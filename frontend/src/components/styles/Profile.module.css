@@ -1,11 +1,37 @@
-.profileContainer > div{
+.profileContainer>div {
     display: flex;
     gap: 0.2rem;
     align-items: center;
 }
 
-.profileContainer{
+.profileContainer {
     display: flex;
     justify-content: center;
     flex-direction: column;
+    user-select: none;
+}
+
+.profileInfoContainer:hover {
+    background-color: rgb(119, 160, 221);
+    border-radius: 5%;
+}
+
+.profileInfoContainer:active {
+    background-color: rgb(74, 128, 210);
+    border-radius: 5%;
+}
+
+.logoutBtn {
+    border: 0;
+    background-color: rgb(31, 43, 61);
+    color: rgb(175, 194, 223);
+    border-radius: 7%;
+}
+
+.logoutBtn:hover {
+    color: white;
+}
+
+.logoutBtn:active {
+    color: rgb(255, 117, 117);
 }

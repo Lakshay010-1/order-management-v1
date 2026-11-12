@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { setHeaderContent } from "../store/slices/headerSlice";
+import {
+  setHeaderContent,
+  setHeaderErrorMsg,
+} from "../store/slices/headerSlice";
 import AddIcon from "@mui/icons-material/Add";
 import styles from "./styles/OrderForm.module.css";
 import { fetchStatuses } from "../store/slices/statusSlice";
@@ -19,6 +22,7 @@ import OrderGridCell from "./OrderGridCell";
 import { useNavigate } from "react-router-dom";
 import { fetchPoTypes } from "../store/slices/poTypesSlice";
 import OrderFormServies from "./OrderFormServices";
+import { compareDates } from "../utils/compareDates";
 
 function createOptionsList(
   list: Array<any>,
@@ -35,7 +39,7 @@ function createOptionsList(
 const newOrderInitialState = {
   po_date: new Date(),
   po_number: "",
-  po_type_id: "",
+  po_type_id: 1,
   status_id: "",
   party_id: "",
   total_services: "",
@@ -79,9 +83,11 @@ export default function OrderForm() {
 
   const [addOrderStatus, setAddOrderStatus] = useState(false);
 
-  const { currentOrder, error: ordersError } = useAppSelector(
-    (state) => state.orders,
-  );
+  const {
+    currentOrder,
+    error: ordersError,
+    loading: ordersLoading,
+  } = useAppSelector((state) => state.orders);
   const { statuses, initialized: statusesInitialized } = useAppSelector(
     (state) => state.statuses,
   );
@@ -109,6 +115,8 @@ export default function OrderForm() {
     Array<newPaymentTCState>
   >([]);
 
+  const [fieldError, setFieldError] = useState(false);
+
   const [itemsOptions, setItemsOptions] = useState<
     Array<{ id: any; value: any }>
   >([]);
@@ -121,6 +129,14 @@ export default function OrderForm() {
   const [poTypesOptions, setPoTypesOptions] = useState<
     Array<{ id: any; value: any }>
   >([]);
+
+  const overviewKeys = [
+    { name: "PO Number", type: "text", key: "po_number", required: true },
+    { name: "PO Date", type: "date", key: "po_date", required: true },
+    { name: "PO Type", type: "select", key: "po_type", required: true },
+    { name: "Party", type: "select", key: "party", required: true },
+    { name: "Status", type: "select", key: "status", required: true },
+  ];
 
   const servicesKeys = [
     { name: "Description", type: "text", key: "description", required: false },
@@ -157,6 +173,47 @@ export default function OrderForm() {
       key: "deliver_date",
     },
   ];
+
+  const hardwareInstallationKeys = [
+    {
+      name: "Expected Installation Date",
+      type: "date",
+      key: "hardware_installation_expected_date",
+      required: true,
+    },
+    {
+      name: "Installation Date",
+      type: "date",
+      key: "hardware_installation_date",
+    },
+    {
+      name: "Installation Status",
+      type: "select",
+      key: "hardware_installation_status_id",
+      required: true,
+    },
+  ];
+
+  const softwareInstallationKeys = [
+    {
+      name: "Expected Installation Date",
+      type: "date",
+      key: "software_installation_expected_date",
+      required: true,
+    },
+    {
+      name: "Installation Date",
+      type: "date",
+      key: "software_installation_date",
+    },
+    {
+      name: "Installation Status",
+      type: "select",
+      key: "software_installation_status_id",
+      required: true,
+    },
+  ];
+
   // const MaterialDispatchKeys = [
   //   {
   //     name: "Material Id",
@@ -196,6 +253,7 @@ export default function OrderForm() {
 
   useEffect(() => {
     if (addOrderStatus) {
+      setAddOrderStatus(false);
       const {
         po_date,
         po_number,
@@ -212,7 +270,7 @@ export default function OrderForm() {
       } = newOrder;
       const newOdr_a = {
         po_date: formatDate(po_date),
-        po_number: Number(po_number),
+        po_number,
         po_type_id,
         status_id,
         party_id,
@@ -247,9 +305,72 @@ export default function OrderForm() {
         ...newOdr_a,
         ...(po_type_id == 1 ? newOdr_b : newOdr_c),
       };
+
+      let missingRequiredFields = false;
+      let requiredFields = [...overviewKeys];
+
+      if (po_type_id == 1) {
+        requiredFields = [
+          ...requiredFields,
+          ...hardwareInstallationKeys,
+          ...softwareInstallationKeys,
+        ];
+      } else {
+        requiredFields = [
+          ...requiredFields,
+          { key: "total_services", required: true },
+        ];
+      }
+
+      newOdr["status"] = status_id;
+      newOdr["party"] = party_id;
+      newOdr["po_type"] = po_type_id;
+
+      requiredFields.forEach((field) => {
+        missingRequiredFields =
+          missingRequiredFields ||
+          ((field.required ?? false) && !newOdr[field.key]);
+      });
+
+      if (missingRequiredFields) {
+        setFieldError(true);
+        return;
+      }
+
+      const new_order_po_date = newOdr.po_date;
+      if (po_type_id == 1) {
+        for (const odrMaterial of newOdr.materials) {
+          const order_date = odrMaterial.order_date,
+            purchase_date = odrMaterial.purchase_date,
+            deliver_date = odrMaterial.deliver_date;
+          if (
+            !compareDates(new_order_po_date, order_date) ||
+            (purchase_date && !compareDates(order_date, purchase_date)) ||
+            (deliver_date && !compareDates(purchase_date, deliver_date))
+          ) {
+            return;
+          }
+        }
+      } else {
+        for (const odrService of newOdr.services) {
+          if (!compareDates(new_order_po_date, odrService.date)) {
+            return;
+          }
+        }
+      }
+
       dispatch(insertOrder(newOdr));
     }
   }, [addOrderStatus]);
+
+  // useEffect(() => {
+  //   if (!addOrderStatus || ordersLoading) {
+  //     return;
+  //   }
+  //   setFieldError(ordersError == null);
+  //   dispatch(setHeaderErrorMsg(ordersError));
+  //   setAddOrderStatus(() => false);
+  // }, [addOrderStatus, ordersError, ordersLoading]);
 
   useEffect(() => {
     if (!itemsInitialized) {
@@ -284,20 +405,7 @@ export default function OrderForm() {
   }, [statusesInitialized]);
 
   useEffect(() => {
-    dispatch(
-      setHeaderContent(
-        <div className={styles.orderFormHeader}>
-          <h2>New Order</h2>
-          <button
-            onClick={() => {
-              setAddOrderStatus(true);
-            }}
-          >
-            <AddIcon />
-          </button>
-        </div>,
-      ),
-    );
+    dispatch(setHeaderContent("New Order"));
   }, [dispatch]);
 
   function formatDate(value: unknown): string {
@@ -318,6 +426,8 @@ export default function OrderForm() {
         {/* <div style={{ gridArea: "a" }} className={styles.firstRow}> */}
         <OrderGridCell gridArea={"a"} title="Overview" color="orange">
           <OrderFormOverview
+            fieldError={fieldError}
+            fields={overviewKeys}
             order={newOrder}
             handleChange={setNewOrder}
             partiesOptions={partiesOptions}
@@ -331,6 +441,7 @@ export default function OrderForm() {
           <>
             <OrderGridCell gridArea={"d"} title="Materials" color="gold">
               <OrderFormMaterials
+                order={newOrder}
                 fields={materialKeys}
                 itemsOptions={itemsOptions}
                 orderMaterials={orderMaterials}
@@ -340,6 +451,8 @@ export default function OrderForm() {
             </OrderGridCell>
             <OrderGridCell gridArea={"f"} title={"Hardware"} color={"blue"}>
               <OrderFormHardwareIns
+                fieldError={fieldError}
+                fields={hardwareInstallationKeys}
                 order={newOrder}
                 handleChange={setNewOrder}
                 statusesOptions={statusesOptions}
@@ -348,6 +461,8 @@ export default function OrderForm() {
             </OrderGridCell>
             <OrderGridCell gridArea={"g"} title={"Software"} color={"green"}>
               <OrderFormSoftwareIns
+                fieldError={fieldError}
+                fields={softwareInstallationKeys}
                 order={newOrder}
                 handleChange={setNewOrder}
                 statusesOptions={statusesOptions}
@@ -361,6 +476,7 @@ export default function OrderForm() {
               order={newOrder}
               handleOrderChange={setNewOrder}
               fields={servicesKeys}
+              fieldError={fieldError}
               orderServices={orderServices}
               handleOrderServicesChange={setOrderServices}
               formatDate={formatDate}
@@ -381,6 +497,18 @@ export default function OrderForm() {
           />
         </OrderGridCell>
         {/* </div> */}
+      </div>
+      <div
+        className={styles.orderOperationsHeader}
+        onClick={() => {
+          setAddOrderStatus(true);
+        }}
+      >
+        <div>
+          <button type="button" aria-label="Add New Order">
+            <AddIcon sx={{ fontSize: "2rem" }} />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -29,11 +29,11 @@ const materialDispatchesKeys = [
 ];
 
 const addDataInitialState = {
-  material: { id: -1, value: "" },
+  material: { id: "", value: "" },
   quantity: "",
   dispatch_date: "",
   confirmation_date: "",
-  delivered_by: { id: -1, value: "" },
+  delivered_by: { id: "", value: "" },
 };
 
 export default function MaterialsDispatchesGridData({
@@ -169,7 +169,8 @@ export default function MaterialsDispatchesGridData({
             details: {
               quantity: Number(oMatDisptch.quantity),
               dispatch_date: new Date(oMatDisptch.dispatch_date),
-              delivered_by: oMatDisptch.delivered_by.id,
+              delivered_by:
+                oMatDisptch.delivered_by?.id ?? oMatDisptch.delivered_by_id,
               confirmation_date: new Date(oMatDisptch.confirmation_date),
             },
           }),

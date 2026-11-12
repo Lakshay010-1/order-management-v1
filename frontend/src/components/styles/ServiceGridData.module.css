@@ -2,8 +2,10 @@
     display: grid;
     grid-auto-flow: row;
     grid-template-columns: repeat(4, auto);
+    grid-template-columns: repeat(2, min-content) 1fr min-content;
+    row-gap: 0.5rem;
     overflow-y: scroll;
-    max-height: 22rem;
+    max-height: 95dvh;
     padding-right: 0.5rem;
 }
 
@@ -14,13 +16,18 @@
 }
 
 .valueOne {
-    text-align: left;
+    padding: 0 0.2rem;
     text-align: center;
+    text-align: left;
     font-size: small;
     color: var(--color-03);
     field-sizing: content;
-    min-width: 1ch;
+    min-width: fit-content;
     max-width: 100%;
+}
+
+.valueOne[type="date"],
+.valueOne[type="number"] {
     text-align: center;
 }
 
@@ -43,6 +50,12 @@
 .red {
     background-color: red;
     border: 1px black solid;
+}
+
+.blackRed {
+    background-color: black;
+    color: red;
+    border: 1px rgb(255, 100, 100) solid;
 }
 
 .lightgreen {

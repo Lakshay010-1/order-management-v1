@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import BasicTable from "../components/ItemsDatatable";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
@@ -11,6 +11,7 @@ import Loader from "../components/Loader";
 import type { Party } from "../types/Party";
 import { setHeaderContent } from "../store/slices/headerSlice";
 import AlertDialog from "../components/AlertDialog";
+import styles from "./styles/Parties.module.css";
 
 export default function Parties() {
   const fields: (keyof Party)[] = [
@@ -36,6 +37,8 @@ export default function Parties() {
   useEffect(() => {
     dispatch(setHeaderContent("Parties"));
   }, []);
+
+  const party_name_field_ref = useRef(null);
 
   function handleAdd(newPartyData: Party) {
     const validData: Partial<Party> = {};
@@ -99,6 +102,7 @@ export default function Parties() {
         handleUpdate={handleUpdate}
         handleDelete={handleDelete}
         handleAdd={handleAdd}
+        focusFieldTo={"party"}
       />
       <AlertDialog
         open={openDialog}

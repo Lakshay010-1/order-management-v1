@@ -25,7 +25,7 @@ export default function BasicSelect({
       <Select
         labelId="nav-bar-select-label"
         id="nav-bar-select"
-        value={String(selectedOption.id == -1 ? "" : selectedOption.id)}
+        value={String(options.length == 0 ? "" : selectedOption.id)}
         onChange={handleChange}
         disabled={isDisabled ?? false}
         style={{

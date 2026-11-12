@@ -33,6 +33,14 @@ const getOrderMaterialDispatches: (
   );
 };
 
+const getOrderMaterialsDispatches: (
+  order_id: number,
+) => Promise<Array<MaterialDispatch>> = async (order_id) => {
+  return getMethodCall<Array<MaterialDispatch>>(
+    ORDER_MATERIAL_DISPATCH_API_LINK(order_id, 0),
+  );
+};
+
 const putOrderMaterialDispatch: (
   order_id: number,
   material_id: number,
@@ -72,5 +80,6 @@ export {
   addOrderMaterialDispatch,
   deleteOrderMaterialDispatch,
   getOrderMaterialDispatches,
+  getOrderMaterialsDispatches,
   putOrderMaterialDispatch,
 };

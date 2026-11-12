@@ -5,14 +5,15 @@
 }
 
 .valueOne {
+    padding: 0 0.2rem;
     text-align: left;
     font-size: small;
     color: var(--color-03);
-
     field-sizing: content;
-    min-width: 1ch;
+    min-width: fit-content;
     max-width: 100%;
     text-align: center;
+    height: 100%;
 }
 
 
@@ -20,9 +21,18 @@
     display: grid;
     grid-template-rows: repeat(2, max-content);
     grid-auto-flow: column;
-    overflow-x: scroll;
+    /* overflow-x: scroll; */
     /* grid-template-columns: 1fr 1fr; */
 
     /* display: flex; */
     gap: 2rem;
+}
+
+
+
+@media (max-width:1024px) {
+    .hardwareDetails {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-flow: row;
+    }
 }

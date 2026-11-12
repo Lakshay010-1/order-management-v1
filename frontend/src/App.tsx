@@ -9,6 +9,7 @@ import Statuses from "./pages/Statuses.js";
 import ProtectedLayout from "./layout/ProtectedLayout.js";
 import Order from "./pages/Order.js";
 import OrderForm from "./components/OrderForm.js";
+import RegisterForm from "./components/RegisterForm.js";
 
 function App() {
   return (
@@ -26,6 +27,9 @@ function App() {
               <Route path="/parties" element={<Parties />} />
               <Route path="/items" element={<Items />} />
               <Route path="/statuses" element={<Statuses />} />
+              <Route path="/users">
+                <Route path="register" element={<RegisterForm />} />
+              </Route>
             </Route>
           </Route>
         </Routes>

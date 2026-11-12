@@ -1,44 +1,24 @@
 import React, { type ChangeEvent } from "react";
 import type { Order } from "../types/Order";
 import styles from "./styles/SoftwareGridData.module.css";
-
-interface RowDataFormat {
-  key: string;
-  name: string;
-  type: string;
-  required?: boolean;
-}
-const softwareData: Array<RowDataFormat> = [
-  {
-    name: "Installation Date",
-    key: "software_installation_date",
-    type: "date",
-  },
-  {
-    name: "Expected Installation Date",
-    key: "software_installation_expected_date",
-    type: "date",
-    required: true,
-  },
-  {
-    name: "Installation Status",
-    key: "software_installation_status",
-    type: "select",
-    required: true,
-  },
-];
+import type { FieldKey } from "../types/FieldKey";
+import { compareDates } from "../utils/compareDates";
 
 export default function SoftwareGridData({
+  fields,
   order,
   formatDate,
   updateOrder,
   editMode,
+  fieldError,
   children,
 }: {
+  fields: Array<FieldKey>;
   order: Order;
   formatDate: (value: string) => string;
   updateOrder: (e: ChangeEvent<HTMLInputElement, HTMLInputElement>) => void;
   editMode: boolean;
+  fieldError: boolean;
   children: any;
 }) {
   return (
@@ -46,12 +26,20 @@ export default function SoftwareGridData({
       // style={{ gridTemplateRows: `repeat(${softwareData.length},1fr)` }}
       className={styles.softwareDetails}
     >
-      {softwareData.map((d, idx) => {
+      {fields.map((d, idx) => {
         const isDate = d.type == "date";
         const field = d.key as keyof Order;
-        const value = order[field];
-        let inputValue;
-        inputValue = isDate ? formatDate(value) : value;
+        const value =
+          d.type == "date" ? formatDate(order[field]) : order[field];
+        const updatedValue =
+          d.type === "date" ? compareDates(order.po_date, value) : value;
+        const min =
+          d.type == "date" || d.type == "number"
+            ? {
+                min: d.type == "date" ? formatDate(order.po_date) : 0,
+              }
+            : {};
+
         return (
           // <div
           //   style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}
@@ -67,15 +55,25 @@ export default function SoftwareGridData({
               ) : (
                 <input
                   key={d.key + "input"}
+                  {...min}
+                  style={
+                    (value && !updatedValue) || fieldError
+                      ? {
+                          border: "1px solid red",
+                        }
+                      : {}
+                  }
                   type={isDate ? "date" : "text"}
                   className={styles.valueOne}
                   disabled={!editMode}
-                  value={inputValue}
+                  value={value && updatedValue != value ? value : updatedValue}
                   onChange={(e) =>
                     updateOrder((prev) => {
                       return {
                         ...prev,
-                        [d.key]: e.target.value,
+                        [d.key]: isDate
+                          ? formatDate(e.target.value)
+                          : e.target.value,
                       };
                     })
                   }

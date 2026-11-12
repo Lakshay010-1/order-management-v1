@@ -26,7 +26,7 @@ const materialsKeys = [
 ];
 
 const addDataInitialState = {
-  material: { id: -1, value: "" },
+  material: { id: "", value: "" },
   quantity: "",
   order_date: "",
   purchase_date: "",

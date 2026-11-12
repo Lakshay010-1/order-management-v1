@@ -3,6 +3,7 @@
     justify-content: space-between;
     background-color: rgb(175, 194, 223);
     padding: 1rem;
+    position: relative;
 }
 
 .headerPage {
@@ -31,7 +32,7 @@
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
-    justify-content: start;
+    justify-content: space-between;
 }
 
 .header a {
@@ -48,6 +49,31 @@
     text-decoration: none;
 }
 
+.userUnVerifiedText {
+    font-size: 2.5rem;
+}
+
+.header .newOrderLink {
+    background-color: rgb(31, 43, 61);
+    color: rgb(175, 194, 223);
+    border-radius: 7%;
+    text-decoration: none;
+}
+
+.header .newOrderLink:hover {
+    color: white;
+}
+
+.header .newOrderLink:active {
+    color: rgb(253, 255, 117);
+}
+
+.justifyCenter {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 @media (max-width:768px) {
     .header {
         flex-direction: column;
@@ -58,7 +84,7 @@
     }
 }
 
-@media (max-width:475px) {
+@media (max-width:600px) {
     .headerPages {
         flex-wrap: wrap;
         justify-content: end;

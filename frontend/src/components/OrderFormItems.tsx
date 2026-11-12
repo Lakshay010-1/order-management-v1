@@ -19,9 +19,9 @@ export default function OrderFormItems({
   itemsOptions: Array<{ id: number; value: string }>;
   formatDate: (val: any) => string;
 }) {
-  const addDataInitialState = { item_id: -1, quantity: 0, date: new Date() };
+  const addDataInitialState = { item_id: "", quantity: 0, date: new Date() };
   const selectedOptionInitialState = {
-    id: -1,
+    id: "",
     value: "",
   };
   const [addData, setAddData] = useState(addDataInitialState);

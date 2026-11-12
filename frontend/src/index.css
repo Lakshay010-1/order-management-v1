@@ -27,6 +27,22 @@ body {
     color: red;
 }
 
+textarea {
+    resize: vertical;
+    min-height: 1rem;
+    word-break: break-all;
+    line-break: auto;
+    max-width: 60%;
+}
+
+input[type="checkbox"] {
+    max-height: 2rem;
+}
+
+input {
+    min-width: fit-content;
+}
+
 /* .complete-value:hover {
     background-color: lightgreen !important;
     color: green !important;

@@ -1,4 +1,4 @@
-import { AUTH_LINK } from "./URLs";
+import { API_LINK, AUTH_LINK } from "./URLs";
 import { getMethodCall } from "./method_calls/GetCall";
 import { postMethodCall } from "./method_calls/PostCall";
 
@@ -17,4 +17,11 @@ const checkUser: () => Promise<{ username: string }> = async () => {
   return getMethodCall<{ username: string }>(`${AUTH_LINK}/me`);
 };
 
-export { loginUser, logoutUser, checkUser };
+const registerUser: (
+  username: string,
+  password: string,
+) => Promise<boolean> = async (username, password) => {
+  return postMethodCall(`${API_LINK}/users/register`, { username, password });
+};
+
+export { loginUser, logoutUser, checkUser, registerUser };

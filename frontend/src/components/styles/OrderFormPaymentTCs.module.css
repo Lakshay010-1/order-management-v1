@@ -1,13 +1,17 @@
 .container {
     padding-right: 0.5rem;
     overflow-y: scroll;
+    min-height: 15rem;
+    width: 100%;
 
 }
 
 .paymentstcsDetails {
     display: grid;
     grid-auto-flow: row;
-    grid-template-columns: 65% 20% 15%;
+    grid-template-columns: 1fr repeat(2, max-content);
+    row-gap: 0.5rem;
+
 }
 
 
@@ -15,22 +19,20 @@
     font-size: larger;
     margin: 0;
     padding: 0 0.5rem;
+    /* text-align: left; */
+
 }
 
 .valueOne {
+    padding: 0 0.2rem;
     text-align: left;
-    text-align: center;
     font-size: small;
     color: var(--color-03);
-    field-sizing: content;
-    min-width: 1ch;
+    min-width: 0;
     max-width: 100%;
-    text-align: center;
-
 }
 
 .valueOne[type="checkbox"] {
-    width: 40%;
     display: flex;
     justify-self: center;
 }
@@ -46,8 +48,11 @@
 
 .red {
     background-color: red;
+    border: 1px black solid;
 }
 
-.border1 {
-    border: 1px black solid;
+.blackRed {
+    background-color: black;
+    color: red;
+    border: 1px rgb(255, 100, 100) solid;
 }

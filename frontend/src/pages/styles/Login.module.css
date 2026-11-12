@@ -15,6 +15,21 @@
     min-width: 20rem;
 }
 
+.loginSubmitBtn {
+    border: 0;
+    background-color: rgb(31, 43, 61);
+    color: rgb(175, 194, 223);
+    border-radius: 7%;
+}
+
+.loginSubmitBtn:hover {
+    color: white;
+}
+
+.loginSubmitBtn:active {
+    color: rgb(67, 212, 45);
+}
+
 .loginForm div {
     display: flex;
     flex-direction: column;

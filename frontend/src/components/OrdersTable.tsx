@@ -128,7 +128,7 @@ function Row(props: {
   );
 }
 
-export default function CollapsibleTable({
+export default function OrdersTable({
   orders,
   handleDelete,
   handleOrdersSort,

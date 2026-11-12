@@ -2,6 +2,8 @@
     display: grid;
     grid-auto-flow: row;
     grid-template-columns: repeat(4, auto);
+    grid-template-columns: min-content 1fr repeat(2, min-content);
+    row-gap: 0.5rem;
     overflow-y: scroll;
     max-height: 22rem;
     padding-right: 0.5rem;
@@ -14,14 +16,13 @@
 }
 
 .valueOne {
+    padding: 0 0.2rem;
     text-align: left;
-    text-align: center;
     font-size: small;
     color: var(--color-03);
     field-sizing: content;
-    min-width: 1ch;
+    min-width: fit-content;
     max-width: 100%;
-    text-align: center;
 }
 
 .valueOne[type="checkbox"] {
@@ -40,9 +41,16 @@
 }
 
 
+
 .red {
     background-color: red;
     border: 1px black solid;
+}
+
+.blackRed {
+    background-color: black;
+    color: red;
+    border: 1px rgb(255, 100, 100) solid;
 }
 
 .lightgreen {

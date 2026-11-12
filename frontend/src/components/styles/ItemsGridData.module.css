@@ -10,7 +10,7 @@
     padding: 0 0.5rem;
 }
 
-.valueOne {
+.valueOne { padding:0 0.2rem;
     text-align: left;
     text-align: center;
     font-size: small;

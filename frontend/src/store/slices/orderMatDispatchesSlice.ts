@@ -8,23 +8,31 @@ import {
   addOrderMaterialDispatch,
   deleteOrderMaterialDispatch,
   getOrderMaterialDispatches,
+  getOrderMaterialsDispatches,
   putOrderMaterialDispatch,
 } from "../../api/OrderMaterialDispatchApi";
 import { addData, updateData } from "../../utils/handleArrayData";
 
 interface orderMaterialDispatchesState {
-  orderMaterialDispatches: Array<MaterialDispatch>;
+  orderMaterialsDispatches: Array<MaterialDispatch>;
   loading: boolean;
   error: string | null;
   initialized: boolean;
 }
 
 const orderMaterialDispatchesInitialState: orderMaterialDispatchesState = {
-  orderMaterialDispatches: [],
+  orderMaterialsDispatches: [],
   loading: false,
   error: null,
   initialized: false,
 };
+
+export const fetchorderMaterialsDispatches = createAsyncThunk(
+  "orderMaterialDispatches/fetchorderMaterialsDispatches",
+  async (order_id: number) => {
+    return await getOrderMaterialsDispatches(order_id);
+  },
+);
 
 export const fetchorderMaterialDispatches = createAsyncThunk(
   "orderMaterialDispatches/fetchorderMaterialDispatches",
@@ -109,19 +117,19 @@ const orderMaterialDispatchesSlice = createSlice({
       state,
       action: PayloadAction<Array<MaterialDispatch>>,
     ) => {
-      state.orderMaterialDispatches = [
-        ...state.orderMaterialDispatches,
+      state.orderMaterialsDispatches = [
+        ...state.orderMaterialsDispatches,
         ...action.payload,
       ];
     },
     clearOrderMaterialDispatchesGlobal: (state) => {
-      state.orderMaterialDispatches = [];
+      state.orderMaterialsDispatches = [];
     },
   },
   extraReducers: (builder) => {
     builder
 
-      // Fetch Orders
+      // Fetch particualr material dispatches
       .addCase(fetchorderMaterialDispatches.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -129,17 +137,33 @@ const orderMaterialDispatchesSlice = createSlice({
       .addCase(fetchorderMaterialDispatches.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
-        state.orderMaterialDispatches = [
-          ...state.orderMaterialDispatches,
-          ...action.payload,
-        ];
+        state.orderMaterialsDispatches = action.payload;
       })
       .addCase(fetchorderMaterialDispatches.rejected, (state, action) => {
         state.error =
           action.error.message ??
           "Something went wrong: Fetching order material dispatches";
         state.loading = false;
-        state.orderMaterialDispatches = [];
+        state.orderMaterialsDispatches = [];
+      })
+
+      // Fetch all dispatches
+      .addCase(fetchorderMaterialsDispatches.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchorderMaterialsDispatches.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.initialized = true;
+        state.orderMaterialsDispatches = action.payload;
+      })
+      .addCase(fetchorderMaterialsDispatches.rejected, (state, action) => {
+        state.error =
+          action.error.message ??
+          "Something went wrong: Fetching order materials dispatches";
+        state.loading = false;
+        state.orderMaterialsDispatches = [];
       })
 
       // Add Order
@@ -150,9 +174,9 @@ const orderMaterialDispatchesSlice = createSlice({
       .addCase(insertOrderMaterialDispatch.fulfilled, (state, action) => {
         state.error = null;
         state.loading = false;
-        state.orderMaterialDispatches = addData(
+        state.orderMaterialsDispatches = addData(
           action.payload,
-          state.orderMaterialDispatches,
+          state.orderMaterialsDispatches,
         );
       })
       .addCase(insertOrderMaterialDispatch.rejected, (state, action) => {
@@ -171,10 +195,10 @@ const orderMaterialDispatchesSlice = createSlice({
         const { material_dispatch_id, details } = action.meta.arg;
         state.error = null;
         state.loading = false;
-        state.orderMaterialDispatches = updateData(
+        state.orderMaterialsDispatches = updateData(
           material_dispatch_id,
           details,
-          state.orderMaterialDispatches,
+          state.orderMaterialsDispatches,
         );
       })
       .addCase(updateOrderMaterialDispatch.rejected, (state, action) => {
@@ -192,7 +216,7 @@ const orderMaterialDispatchesSlice = createSlice({
       .addCase(removeOrderMaterialDispatch.fulfilled, (state, action) => {
         state.error = null;
         state.loading = false;
-        state.orderMaterialDispatches = state.orderMaterialDispatches.filter(
+        state.orderMaterialsDispatches = state.orderMaterialsDispatches.filter(
           (dispatch) => dispatch.id !== action.meta.arg.material_dispatch_id,
         );
       })

@@ -2,36 +2,26 @@ import React, { useState } from "react";
 import type { NewOrder } from "../types/NewOrder";
 import styles from "./styles/OrderFormSoftwareIns.module.css";
 import BasicSelect from "./Select";
+import { compareDates } from "../utils/compareDates";
 
-const softwareInstallationKeys = [
-  {
-    name: "Expected Installation Date",
-    type: "date",
-    key: "software_installation_expected_date",
-    required: true,
-  },
-  {
-    name: "Installation Date",
-    type: "date",
-    key: "software_installation_date",
-  },
-  {
-    name: "Installation Status",
-    type: "select",
-    key: "software_installation_status_id",
-    required: true,
-  },
-];
-
-const initialState = { id: -1, value: "" };
+const initialState = { id: "", value: "" };
 
 export default function OrderFormSoftwareIns({
+  fields,
   order,
+  fieldError,
   statusesOptions,
   handleChange,
   formatDate,
 }: {
+  fields: Array<{
+    name: string;
+    type: string;
+    key: string;
+    required?: boolean;
+  }>;
   order: NewOrder;
+  fieldError: boolean;
   statusesOptions: Array<{ id: any; value: any }>;
   handleChange: (val: any) => void;
   formatDate: (val: any) => string;
@@ -48,13 +38,25 @@ export default function OrderFormSoftwareIns({
   return (
     <div
       // style={{
-      //   gridTemplateRows: `repeat(${softwareInstallationKeys.length},1fr)`,
+      //   gridTemplateRows: `repeat(${fields.length},1fr)`,
       // }}
       className={styles.softwareDetails}
     >
-      {softwareInstallationKeys.map((field, fieldIdx) => {
+      {fields.map((field, fieldIdx) => {
         const value = order[field.key as keyof NewOrder];
-        const updatedValue = field.type === "date" ? formatDate(value) : value;
+        const updatedValue =
+          field.type === "date" ? compareDates(order.po_date, value) : value;
+        const min =
+          field.type == "date" || field.type == "number"
+            ? {
+                min: field.type == "date" ? formatDate(order.po_date) : 0,
+              }
+            : {};
+
+        // handleChange((prev) => {
+        //   return { ...prev, [field.key]: updatedValue };
+        // });
+
         return (
           <React.Fragment key={fieldIdx}>
             <p>
@@ -66,11 +68,20 @@ export default function OrderFormSoftwareIns({
                 options={statusesOptions}
                 handleOptionChange={handleStatusChange}
                 selectedOption={selectedStatus}
+                required={fieldError && field?.required && !selectedStatus.id}
               />
             ) : (
               <input
+                {...min}
                 type={field.type}
                 value={updatedValue}
+                style={
+                  fieldError && field?.required && !updatedValue
+                    ? {
+                        border: "1px solid red",
+                      }
+                    : {}
+                }
                 onChange={(e) =>
                   handleChange((prev) => {
                     return { ...prev, [field.key]: e.target.value };

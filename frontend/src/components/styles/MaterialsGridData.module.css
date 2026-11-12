@@ -13,7 +13,7 @@
     padding: 0 0.5rem;
 }
 
-.valueOne {
+.valueOne { padding:0 0.2rem;
     text-align: left;
     text-align: center;
     /* min-width: 0; */
@@ -23,8 +23,8 @@
     max-width: max-content;
     color: var(--color-03);
     field-sizing: content;
-    min-width: 1ch;
-    max-width: 100%;
+    min-width: fit-content;
+    max-width: 100%; 
     text-align: center;
 }
 
@@ -59,4 +59,10 @@
 
 .blue {
     background-color: #2373F4;
+}
+
+
+@media (max-width:930px){
+    .materialsDetails{
+    }
 }

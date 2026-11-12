@@ -1,32 +1,48 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./styles/Login.module.css";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { signIn, validateUser } from "../store/slices/authSlice";
+import {
+  enrollUser,
+  resetRegisterMsg,
+  signIn,
+  validateUser,
+} from "../store/slices/authSlice";
 import { setUserAuthStatus } from "../store/slices/headerSlice";
+import Loader from "../components/Loader";
 
-function Login() {
+function Login({ isRegistered }: { isRegistered: boolean }) {
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const [isRegistered, setIsRegistered] = useState(true);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // const [isRegistered, setIsRegistered] = useState(true);
   const dispatch = useAppDispatch();
+  const { registerLoading, registerMsg } = useAppSelector(
+    (state) => state.auth,
+  );
 
   function handleFormSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
+    const username = usernameRef.current?.value ?? "";
+    const password = passwordRef.current?.value ?? "";
+    usernameRef.current.value = "";
+    passwordRef.current.value = "";
     if (!isRegistered) {
-      dispatch(setUserAuthStatus(!isRegistered));
-      setIsRegistered((prev) => !prev);
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+      }
+      dispatch(enrollUser({ username, password }));
+      timeoutRef.current = setTimeout(() => {
+        dispatch(resetRegisterMsg());
+      }, 3000);
     } else {
-      dispatch(
-        signIn({
-          username: usernameRef.current?.value ?? "",
-          password: passwordRef.current?.value ?? "",
-        }),
-      );
+      dispatch(signIn({ username, password }));
     }
   }
 
   return (
     <div className={styles.container}>
+      {!isRegistered && <h2>Register New User</h2>}
       <div>
         <form
           onSubmit={(e) => handleFormSubmit(e)}
@@ -38,6 +54,7 @@ function Login() {
               type="text"
               name="username"
               ref={usernameRef}
+              required
               placeholder="Username"
             />
           </div>
@@ -48,11 +65,14 @@ function Login() {
               name="password"
               ref={passwordRef}
               placeholder="Password"
+              required
             />
           </div>
-          <button type="submit">{isRegistered ? "Login" : "Register"}</button>
+          <button className={styles.loginSubmitBtn} type="submit">
+            {isRegistered ? "Login" : "Register New User"}
+          </button>
         </form>
-        <div>
+        {/* <div>
           <p>
             {(isRegistered ? "Don't" : "Already") + " have an Account?"}{" "}
             <span>
@@ -67,7 +87,16 @@ function Login() {
               </a>
             </span>
           </p>
-        </div>
+        </div> */}
+        {!isRegistered && (
+          <>
+            {registerLoading ? (
+              <Loader message={registerMsg} />
+            ) : (
+              <p>{registerMsg}</p>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

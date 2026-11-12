@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import styles from "./styles/OrderFormServices.module.css";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { v4 as uuidv4 } from "uuid";
 import type { NewOrder_a } from "../types/Order";
+import { compareDates } from "../utils/compareDates";
 
 export default function OrderFormServies({
   fields,
@@ -12,9 +13,11 @@ export default function OrderFormServies({
   handleOrderChange,
   handleOrderServicesChange,
   orderServices,
+  fieldError,
   formatDate,
 }: {
   fields: Array<any>;
+  fieldError: boolean;
   order: NewOrder_a;
   handleOrderChange: (val: any) => void;
   handleOrderServicesChange: (value: any) => void;
@@ -29,6 +32,8 @@ export default function OrderFormServies({
 
   const [addData, setAddData] = useState(addDataInitialState);
   const [error, setError] = useState(false);
+  const [doubleClickDelId, setDoubleClickDelId] = useState<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function clearSelections() {
     setAddData(addDataInitialState);
@@ -40,6 +45,15 @@ export default function OrderFormServies({
         <p>Total Services</p>
         <input
           type="number"
+          min={0}
+          style={
+            fieldError && !order.total_services
+              ? {
+                  border: "1px solid red",
+                }
+              : {}
+          }
+          className={styles.valueOne}
           value={!order.total_services ? 0 : order.total_services}
           onChange={(e) =>
             handleOrderChange((prev) => {
@@ -73,16 +87,27 @@ export default function OrderFormServies({
         {fields.map((field, fieldIdx) => {
           const { type, name, key } = field;
 
-          const minimumNumVal = type == "number" ? { min: 0 } : {};
+          const val = addData[key];
+
+          const updatedValue =
+            type == "date" ? compareDates(order["po_date"], val) : val;
+
+          const minimumValue =
+            type == "date" ? formatDate(order["po_date"]) : 0;
+          const min =
+            type == "date" || type == "number" ? { min: minimumValue } : {};
+
+          addData[key] = updatedValue;
+
           return (
             <input
               style={{
                 border: field.required && error ? "1px solid red" : "",
               }}
-              {...minimumNumVal}
+              {...min}
               key={fieldIdx + key}
               placeholder={name}
-              value={type == "date" ? formatDate(addData[key]) : addData[key]}
+              value={updatedValue}
               type={type}
               onChange={(e) =>
                 setAddData((prev) => {
@@ -99,6 +124,7 @@ export default function OrderFormServies({
               setError(true);
               return;
             }
+            setError(false);
             handleOrderServicesChange((prev) => {
               const updatedorderServices = [
                 ...prev,
@@ -119,14 +145,35 @@ export default function OrderFormServies({
               {fields.map((field, fieldIdx) => {
                 const { key, type, name } = field;
                 const value = oService[key];
+                const updatedValue =
+                  type == "date"
+                    ? compareDates(order["po_date"], value)
+                    : value;
 
-                const updatedValue = type == "date" ? formatDate(value) : value;
+                const minimumValue =
+                  type == "date" ? formatDate(order["po_date"]) : 0;
+
+                const min =
+                  type == "date" || type == "number"
+                    ? { min: minimumValue }
+                    : {};
+
+                // oService[key] = updatedValue;
+
                 return (
                   <input
+                    {...min}
+                    style={
+                      updatedValue != value
+                        ? {
+                            border: "1px solid red",
+                          }
+                        : {}
+                    }
                     key={fieldIdx + key}
                     type={type}
-                    value={updatedValue}
-                    className="valueOne"
+                    value={updatedValue != value ? value : updatedValue}
+                    className={styles.valueOne}
                     onChange={(e) =>
                       handleOrderServicesChange((prev) => {
                         return prev.map((p) => {
@@ -142,12 +189,29 @@ export default function OrderFormServies({
               })}
 
               <button
-                className={`${styles.actionBtn} ${styles.red} ${styles.border1}`}
-                onClick={() =>
-                  handleOrderServicesChange((prev) => {
-                    return prev.filter((p) => p.id !== oService.id);
-                  })
-                }
+                className={`${styles.actionBtn} ${doubleClickDelId == oService.id ? styles.blackRed : styles.red}`}
+                onClick={() => {
+                  if (doubleClickDelId == oService.id) {
+                    if (timeoutRef.current) {
+                      clearTimeout(timeoutRef.current);
+                      timeoutRef.current = null;
+                    }
+                    setDoubleClickDelId(null);
+                    handleOrderServicesChange((prev) => {
+                      return prev.filter((p) => p.id !== oService.id);
+                    });
+                  } else {
+                    if (timeoutRef.current) {
+                      clearTimeout(timeoutRef.current);
+                    }
+                    setDoubleClickDelId(oService.id);
+
+                    timeoutRef.current = setTimeout(() => {
+                      setDoubleClickDelId(null);
+                      timeoutRef.current = null;
+                    }, 1500);
+                  }
+                }}
               >
                 <DeleteIcon />
               </button>

@@ -13,15 +13,17 @@
     padding: 0 0.5rem;
 }
 
-.valueOne {
+.valueOne { padding:0 0.2rem;
     text-align: left;
     text-align: center;
-    font-size: small;
+    /* font-size: small; */
     color: var(--color-03);
-    field-sizing: content;
-    min-width: 1ch;
-    max-width: 100%;
+    /* field-sizing: content; */
+    /* min-width: 1ch; */
+    /* max-width: 100%; */
+    min-width: fit-content;
     text-align: center;
+
 }
 
 .actionBtn {
@@ -54,4 +56,9 @@
 
 .blue {
     background-color: #2373F4;
+}
+
+
+input{
+    min-width: fit-content;
 }

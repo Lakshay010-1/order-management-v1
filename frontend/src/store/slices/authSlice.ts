@@ -1,5 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { loginUser, logoutUser, checkUser } from "../../api/AuthApi";
+import {
+  loginUser,
+  logoutUser,
+  checkUser,
+  registerUser,
+} from "../../api/AuthApi";
 
 interface authState {
   is_verified: boolean;
@@ -7,6 +12,8 @@ interface authState {
   error: string | null;
   initialized: boolean;
   username: string;
+  registerMsg: string;
+  registerLoading: boolean;
 }
 
 const authInitialState: authState = {
@@ -15,11 +22,21 @@ const authInitialState: authState = {
   error: null,
   initialized: false,
   username: "",
+  registerMsg: "",
+  registerLoading: false,
 };
 
 export const validateUser = createAsyncThunk("auth/validateUser", async () => {
   return await checkUser();
 });
+
+export const enrollUser = createAsyncThunk(
+  "auth/enrollUser",
+  async ({ username, password }: { username: string; password: string }) => {
+    const response = await registerUser(username, password);
+    return response;
+  },
+);
 
 export const signIn = createAsyncThunk(
   "auth/signIn",
@@ -36,9 +53,27 @@ export const signOut = createAsyncThunk("auth/signOut", async () => {
 const authSlice = createSlice({
   name: "auth",
   initialState: authInitialState,
-  reducers: {},
+  reducers: {
+    resetRegisterMsg: (state) => {
+      state.registerMsg = "";
+    },
+  },
   extraReducers: (builder) => {
     builder
+      // Register User
+      .addCase(enrollUser.pending, (state) => {
+        state.registerLoading = true;
+        state.registerMsg = "registering user";
+      })
+      .addCase(enrollUser.fulfilled, (state) => {
+        state.registerLoading = false;
+        state.registerMsg = "User registered successfully";
+      })
+      .addCase(enrollUser.rejected, (state, action) => {
+        state.registerLoading = false;
+        state.registerMsg = action.error.message ?? "User registration failed";
+      })
+
       // Sign In
       .addCase(signIn.pending, (state) => {
         state.loading = true;
@@ -93,5 +128,7 @@ const authSlice = createSlice({
       });
   },
 });
+
+export const { resetRegisterMsg } = authSlice.actions;
 
 export default authSlice.reducer;
