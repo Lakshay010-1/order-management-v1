@@ -76,6 +76,22 @@ interface newPaymentTCState {
   fulfilled: boolean;
 }
 
+function OrderGridCellv2(props: {
+  gridArea: string;
+  title: string;
+  children: any;
+}) {
+  return (
+    <OrderGridCell
+      gridArea={props.gridArea}
+      title={props.title}
+      color="#d0d8e1"
+    >
+      {props.children}
+    </OrderGridCell>
+  );
+}
+
 export default function OrderForm() {
   const dispatch = useAppDispatch();
   const [newOrder, setNewOrder] = useState<NewOrder_a>(newOrderInitialState);
@@ -285,7 +301,15 @@ export default function OrderForm() {
         ),
         hardware_installation_status_id,
         software_installation_status_id,
-        materials: orderMaterials,
+        materials: orderMaterials.map((odrMat) => {
+          const updatedOb = {};
+          materialKeys.forEach((field) => {
+            if (field.required || odrMat[field.key]) {
+              updatedOb[field.key] = odrMat[field.key];
+            }
+          });
+          return updatedOb;
+        }),
       };
       if (software_installation_date) {
         newOdr_b["software_installation_date"] = formatDate(
@@ -424,7 +448,7 @@ export default function OrderForm() {
         className={`${styles.orderGrid} ${!newOrder.po_type_id || newOrder.po_type_id == 1 ? styles.orderGrid_a : styles.orderGrid_b}`}
       >
         {/* <div style={{ gridArea: "a" }} className={styles.firstRow}> */}
-        <OrderGridCell gridArea={"a"} title="Overview" color="orange">
+        <OrderGridCellv2 gridArea={"a"} title="Overview">
           <OrderFormOverview
             fieldError={fieldError}
             fields={overviewKeys}
@@ -435,11 +459,11 @@ export default function OrderForm() {
             formatDate={formatDate}
             poTypesOptions={poTypesOptions}
           />
-        </OrderGridCell>
+        </OrderGridCellv2>
 
         {!newOrder.po_type_id || newOrder.po_type_id == 1 ? (
           <>
-            <OrderGridCell gridArea={"d"} title="Materials" color="gold">
+            <OrderGridCellv2 gridArea={"d"} title="Materials">
               <OrderFormMaterials
                 order={newOrder}
                 fields={materialKeys}
@@ -448,8 +472,8 @@ export default function OrderForm() {
                 handleOrderMaterialsChange={setOrderMaterials}
                 formatDate={formatDate}
               />
-            </OrderGridCell>
-            <OrderGridCell gridArea={"f"} title={"Hardware"} color={"blue"}>
+            </OrderGridCellv2>
+            <OrderGridCellv2 gridArea={"f"} title={"Hardware"}>
               <OrderFormHardwareIns
                 fieldError={fieldError}
                 fields={hardwareInstallationKeys}
@@ -458,8 +482,8 @@ export default function OrderForm() {
                 statusesOptions={statusesOptions}
                 formatDate={formatDate}
               />
-            </OrderGridCell>
-            <OrderGridCell gridArea={"g"} title={"Software"} color={"green"}>
+            </OrderGridCellv2>
+            <OrderGridCellv2 gridArea={"g"} title={"Software"}>
               <OrderFormSoftwareIns
                 fieldError={fieldError}
                 fields={softwareInstallationKeys}
@@ -468,10 +492,10 @@ export default function OrderForm() {
                 statusesOptions={statusesOptions}
                 formatDate={formatDate}
               />
-            </OrderGridCell>
+            </OrderGridCellv2>
           </>
         ) : (
-          <OrderGridCell gridArea={"b"} title={"Services"} color={"#92EEFF"}>
+          <OrderGridCellv2 gridArea={"b"} title={"Services"}>
             <OrderFormServies
               order={newOrder}
               handleOrderChange={setNewOrder}
@@ -481,21 +505,17 @@ export default function OrderForm() {
               handleOrderServicesChange={setOrderServices}
               formatDate={formatDate}
             />
-          </OrderGridCell>
+          </OrderGridCellv2>
         )}
 
-        <OrderGridCell
-          gridArea={"c"}
-          title={"Payment Terms & Conditions"}
-          color={"yellow"}
-        >
+        <OrderGridCellv2 gridArea={"c"} title={"Payment Terms & Conditions"}>
           <OrderFormPaymentTCs
             fields={paymentTCKeys}
             orderPaymentTCs={orderPaymentTCs}
             handleOrderPaymentTCsChange={setOrderPaymentTCs}
             po_type_id={!newOrder.po_type_id ? 1 : newOrder.po_type_id}
           />
-        </OrderGridCell>
+        </OrderGridCellv2>
         {/* </div> */}
       </div>
       <div

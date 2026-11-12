@@ -244,7 +244,7 @@ export default function Order() {
     } else {
       dispatch(fetchOrders());
     }
-  }, [ordersInitialized, dispatch, id, currentOrder]);
+  }, [ordersInitialized, dispatch, id, currentOrder, order]);
 
   // Fetch statuses.
   useEffect(() => {
