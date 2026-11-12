@@ -11,7 +11,7 @@ const authRouter = e.Router();
 
 authRouter.get("/me", authenticate, validateUser);
 
-authRouter.post("/register", registerUser);
+// authRouter.post("/register", registerUser);
 
 authRouter.post("/login", loginUser);
 

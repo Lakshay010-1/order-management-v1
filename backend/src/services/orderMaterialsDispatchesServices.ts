@@ -24,12 +24,21 @@ const fetchOrderMaterialsDispatch: (
   id: number,
 ) => Promise<Array<MaterialDispatch> | undefined> = async (id: number) => {
   try {
-    const response = await pool
-      .request()
-      .input("material_id", id)
-      .query(
-        "SELECT md.id, md.quantity, md.dispatch_date, md.confirmation_date, d.medium as delivery_medium, md.created_at FROM order_material_dispatch as md JOIN delivery_mediums as d ON md.delivered_by=d.id WHERE material_id=@material_id",
-      );
+    let response: { recordset: MaterialDispatch[] } = { recordset: [] };
+    if (id == 0) {
+      response = await pool
+        .request()
+        .query(
+          "SELECT md.id, md.quantity, md.material_id, md.dispatch_date, md.confirmation_date, d.medium as delivery_medium, md.delivered_by as delivered_by_id, md.created_at FROM order_material_dispatch as md JOIN delivery_mediums as d ON md.delivered_by=d.id",
+        );
+    } else {
+      response = await pool
+        .request()
+        .input("material_id", id)
+        .query(
+          "SELECT md.id, md.quantity, md.dispatch_date, md.confirmation_date, d.medium as delivery_medium, md.delivered_by as delivered_by_id, md.created_at FROM order_material_dispatch as md JOIN delivery_mediums as d ON md.delivered_by=d.id WHERE material_id=@material_id",
+        );
+    }
     const { recordset } = response;
     return recordset ?? undefined;
   } catch (error) {

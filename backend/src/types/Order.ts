@@ -4,7 +4,7 @@ import type { NewOrderService, OrderService } from "./Service.js";
 
 export interface Order {
   id: number;
-  po_number: number;
+  po_number: string;
   po_date: Date;
   po_type: string;
   total_services: number;
@@ -23,7 +23,7 @@ export interface Order {
 }
 
 export interface NewOrder {
-  po_number: number;
+  po_number: string;
   po_date: Date;
   po_type_id: number;
   total_services: number | undefined;

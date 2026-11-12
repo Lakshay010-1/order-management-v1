@@ -43,7 +43,7 @@ const getOrder = async (req: Request, res: Response) => {
 const addOrder = async (req: Request, res: Response) => {
   const bodySchema1 = z.object({
     po_date: z.coerce.date(),
-    po_number: z.number(),
+    po_number: z.string(),
     po_type_id: z.number(),
     status_id: z.number(),
     party_id: z.number(),
@@ -105,30 +105,49 @@ const addOrder = async (req: Request, res: Response) => {
 };
 
 const updateOrder = async (req: Request, res: Response) => {
-  const bodySchema = z.object({
+  const bodySchema1 = z.object({
+    po_number: z.string(),
     po_date: z.coerce.date(),
-    hardware_installation_date: z.coerce.date(),
-    hardware_installation_status_id: z.number(),
-    software_installation_date: z.coerce.date(),
-    software_installation_status_id: z.number(),
-    status_id: z.number(),
-    party_id: z.number(),
-    po_number: z.number(),
     po_type_id: z.number(),
-    total_services: z.number().optional(),
-    hardware_installation_expected_date: z.coerce.date(),
-    software_installation_expected_date: z.coerce.date(),
+    party_id: z.number(),
+    status_id: z.number(),
   });
+  const validParmas_overview = bodySchema1.safeParse(req.body);
+  if (!validParmas_overview.success) {
+    return apiResponse(res, 400, "Invalid request parameters");
+  }
+  const bodySchema_service = z.object({
+    total_services: z.number(),
+  });
+
+  const bodySchema_installation = z.object({
+    hardware_installation_date: z.coerce.date().optional(),
+    hardware_installation_expected_date: z.coerce.date(),
+    hardware_installation_status_id: z.number(),
+    software_installation_date: z.coerce.date().optional(),
+    software_installation_expected_date: z.coerce.date(),
+    software_installation_status_id: z.number(),
+  });
+  const po_type_id = Number(req.body.po_type_id);
+  const paramsValid_installation = bodySchema_installation.safeParse(req.body);
+  const paramsValid_service = bodySchema_service.safeParse(req.body);
+  if (po_type_id == 1) {
+    if (!paramsValid_installation.success) {
+      return apiResponse(res, 400, "Invalid request parameters");
+    }
+  } else if (po_type_id == 2) {
+    if (!paramsValid_service.success) {
+      return apiResponse(res, 400, "Invalid request parameters");
+    }
+  } else {
+    return apiResponse(res, 400, "Invalid PO Type");
+  }
   const { id } = req.params;
   if (!validateNum(id)) {
     return apiResponse(res, 404, "Invalid id");
   }
-  const paramsValid = bodySchema.safeParse(req.body);
-  if (!paramsValid.success) {
-    return apiResponse(res, 400, "Missing required paramters");
-  }
   try {
-    const response = await putOrder(Number(id), paramsValid.data);
+    const response = await putOrder(Number(id), req.body);
     if (!response) {
       return apiResponse(res, 400, "Failed to update order");
     }

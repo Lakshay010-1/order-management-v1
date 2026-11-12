@@ -280,23 +280,17 @@ const putOrder: (
     party_id,
   } = details;
 
-  const response_1 = await pool
-    .request()
-    .input("order_id", order_id)
-    .input("po_number", po_number)
-    .input("po_type_id", po_type_id)
-    .input("po_date", po_date)
-    .input("status", status_id)
-    .input("party_id", party_id)
-    .query(
-      `UPDATE orders SET po_date=@po_date, status=@status, party_id=@party_id, po_number=@po_number, po_type_id=@po_type_id, WHERE id=@order_id`,
-    );
-  const result_1 = (response_1.rowsAffected[0] ?? 0) > 0;
-  let response_2;
+  let response: { rowsAffected: number[] } = { rowsAffected: [] };
+
   if (po_type_id == 1) {
-    response_2 = await pool
+    response = await pool
       .request()
       .input("order_id", order_id)
+      .input("po_number", po_number)
+      .input("po_type_id", po_type_id)
+      .input("po_date", po_date)
+      .input("status", status_id)
+      .input("party_id", party_id)
       .input(
         "hardware_installation_expected_date",
         hardware_installation_expected_date,
@@ -310,27 +304,34 @@ const putOrder: (
       .input("software_installation_date", software_installation_date)
       .input("software_installation_status", software_installation_status_id)
       .query(
-        `UPDATE orders SET
+        `UPDATE orders SET po_date=@po_date, status=@status, party_id=@party_id, po_number=@po_number, 
+        po_type_id=@po_type_id, 
         hardware_installation_date=@hardware_installation_date, 
         hardware_installation_status=@hardware_installation_status, 
         software_installation_date=@software_installation_date, 
         software_installation_status=@software_installation_status, 
         hardware_installation_expected_date=@hardware_installation_expected_date,
-        software_installation_expected_date=@software_installation_expected_date
-        WHERE id=@order_id
-        `,
+        software_installation_expected_date=@software_installation_expected_date 
+        WHERE id=@order_id`,
       );
   } else {
-    response_2 = await pool
+    response = await pool
       .request()
       .input("order_id", order_id)
+      .input("po_number", po_number)
+      .input("po_type_id", po_type_id)
+      .input("po_date", po_date)
+      .input("status", status_id)
+      .input("party_id", party_id)
       .input("total_services", total_services)
       .query(
-        "UPDATE orders SET total_services=@total_services WHERE id=@order_id",
+        `UPDATE orders SET po_date=@po_date, status=@status, party_id=@party_id, po_number=@po_number,
+         po_type_id=@po_type_id, total_services=@total_services
+        WHERE id=@order_id`,
       );
   }
-  const result_2 = (response_2.rowsAffected[0] ?? 0) > 0;
-  return result_1 && result_2;
+  const { rowsAffected } = response;
+  return rowsAffected[0]! > 0;
 };
 
 export { fetchOrders, fetchOrder, removeOrder, insertOrder, putOrder };

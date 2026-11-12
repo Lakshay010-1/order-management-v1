@@ -31,17 +31,19 @@ const getOrderMaterialDispatches = async (req: Request, res: Response) => {
     if (!orderSuccess) {
       return orderRecordResponse;
     }
-    const {
-      success: orderMaterialSuccess,
-      response: orderMaterialRecordResponse,
-    } = await validateRecordExistance(
-      material_id,
-      "order_material",
-      "Material",
-      res,
-    );
-    if (!orderMaterialSuccess) {
-      return orderMaterialRecordResponse;
+    if (material_id != 0) {
+      const {
+        success: orderMaterialSuccess,
+        response: orderMaterialRecordResponse,
+      } = await validateRecordExistance(
+        material_id,
+        "order_material",
+        "Material",
+        res,
+      );
+      if (!orderMaterialSuccess) {
+        return orderMaterialRecordResponse;
+      }
     }
 
     const response = await fetchOrderMaterialsDispatch(material_id);

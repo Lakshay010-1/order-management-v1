@@ -5,8 +5,11 @@ import partyRouter from "./partyRoutes.js";
 import statusRouter from "./statusRoutes.js";
 import deliveryMediumsRouter from "./deliveryMediumsRouter.js";
 import poTypesRouter from "./poTypesRouter.js";
+import { registerUser } from "../controllers/authController.js";
 
 const ProtectRouter = e.Router();
+
+ProtectRouter.post("/users/register", registerUser);
 
 ProtectRouter.use("/orders", ordersRouter);
 

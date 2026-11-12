@@ -6,7 +6,8 @@ const insertOrderMaterial: (
   order_id: number,
   details: Partial<NewMaterial>,
 ) => Promise<Partial<Material>> = async (order_id, details) => {
-  const { item_id, quantity, order_date, purchase_date } = details;
+  const { item_id, quantity, order_date, purchase_date, deliver_date } =
+    details;
   const response = await pool
     .request()
     .input("item_id", item_id)
@@ -14,8 +15,9 @@ const insertOrderMaterial: (
     .input("order_date", order_date)
     .input("order_id", order_id)
     .input("purchase_date", purchase_date ?? null)
+    .input("deliver_date", deliver_date ?? null)
     .query(
-      "INSERT INTO order_material (order_id, item_id, quantity, order_date, purchase_date ) OUTPUT INSERTED.* VALUES (@order_id, @item_id, @quantity, @order_date, @purchase_date)",
+      "INSERT INTO order_material (order_id, item_id, quantity, order_date, purchase_date, deliver_date ) OUTPUT INSERTED.* VALUES (@order_id, @item_id, @quantity, @order_date, @purchase_date, @deliver_date)",
     );
   const { recordset } = response;
   const itemNameResponse = await pool

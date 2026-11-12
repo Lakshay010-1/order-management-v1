@@ -91,6 +91,7 @@ const addOrderMaterial = async (req: Request, res: Response) => {
     quantity: z.number(),
     order_date: z.coerce.date(),
     purchase_date: z.coerce.date().optional(),
+    deliver_date: z.coerce.date().optional(),
   });
   const paramsValid = bodySchema.safeParse(req.body);
   if (!paramsValid.success) {
@@ -112,7 +113,8 @@ const addOrderMaterial = async (req: Request, res: Response) => {
     }
     const response = await insertOrderMaterial(order_id, {
       ...req.body,
-      purchase_date: req.body.purchase_date ?? undefined,
+      purchase_date: req.body.purchase_date ?? null,
+      deliver_date: req.body.deliver_date ?? null,
     });
     if (!response) {
       return apiResponse(res, 400, "Failed to add order material");
@@ -129,8 +131,8 @@ const updateOrderMaterial = async (req: Request, res: Response) => {
   const bodySchema = z.object({
     quantity: z.number(),
     order_date: z.coerce.date(),
-    purchase_date: z.coerce.date(),
-    deliver_date: z.coerce.date(),
+    purchase_date: z.coerce.date().optional(),
+    deliver_date: z.coerce.date().optional(),
   });
   const paramsValid = bodySchema.safeParse(req.body);
   if (!paramsValid.success) {
@@ -166,10 +168,11 @@ const updateOrderMaterial = async (req: Request, res: Response) => {
     if (!orderMaterialSuccess) {
       return orderMaterialRecordResponse;
     }
-    const response = await putOrderMaterial(
-      order_material_id,
-      paramsValid.data,
-    );
+    const response = await putOrderMaterial(order_material_id, {
+      ...req.body,
+      purchase_date: req.body.purchase_date ?? null,
+      deliver_date: req.body.deliver_date ?? null,
+    });
     if (!response) {
       return apiResponse(res, 400, "Failed to update order material");
     }

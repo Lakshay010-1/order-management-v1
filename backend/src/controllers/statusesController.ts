@@ -40,7 +40,7 @@ const createStatus = async (req: Request, res: Response) => {
     }
     return apiResponse(res, 200, "Status created successfully", recordset[0]);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return apiResponse(res, 500, "Error creating status");
   }
 };
@@ -76,7 +76,7 @@ const updateStatus = async (req: Request, res: Response) => {
     }
     return apiResponse(res, 200, "Status updated successfully");
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return apiResponse(res, 500, "Error updating status");
   }
 };
