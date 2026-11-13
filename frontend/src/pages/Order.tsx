@@ -224,6 +224,9 @@ export default function Order() {
 
   // Fetch current order details
   useEffect(() => {
+    if (editMode) {
+      return;
+    }
     let curOrder;
     if (currentOrder || ordersInitialized) {
       if (currentOrder) {

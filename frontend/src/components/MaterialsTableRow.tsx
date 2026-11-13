@@ -411,8 +411,10 @@ export default function Row(props: {
                                     : {}
                                 }
                                 disabled={
-                                  key == "confirmation_date" &&
-                                  !addMatDispatchData["dispatch_date"]
+                                  (key == "confirmation_date" &&
+                                    !addMatDispatchData["dispatch_date"]) ||
+                                  (key == "dispatch_date" &&
+                                    !row["deliver_date"])
                                 }
                                 onChange={(e) =>
                                   setAddMatDispatchData((prev) => {
@@ -492,7 +494,9 @@ export default function Row(props: {
                                     !editMode ||
                                     key == "delivered_by" ||
                                     (key == "confirmation_date" &&
-                                      !matDispatch["dispatch_date"])
+                                      !matDispatch["dispatch_date"]) ||
+                                    (key == "dispatch_date" &&
+                                      !row["deliver_date"])
                                   }
                                   type={type == "select" ? "text" : type}
                                   placeholder={name}
