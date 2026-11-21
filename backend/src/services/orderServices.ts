@@ -37,11 +37,11 @@ const fetchOrders: () => Promise<Array<Order> | undefined> = async () => {
         s.status, 
         o.created_at 
         FROM orders as o 
-        JOIN statuses as s 
+        LEFT JOIN statuses as s 
         ON o.status=s.id
-        JOIN parties as p
+        LEFT JOIN parties as p
         ON o.party_id=p.id     
-        JOIN po_types as pt
+        LEFT JOIN po_types as pt
         ON o.po_type_id=pt.id   
         `);
 
@@ -55,7 +55,7 @@ const fetchOrders: () => Promise<Array<Order> | undefined> = async () => {
     let response_2: { recordset: Array<any> } = { recordset: [] };
     if (poTypeId == 1) {
       response_2 = await pool.request().input("order_id", elementId).query(`
-    SELECT o.software_installation_status as software_installation_status_id, 
+        SELECT o.software_installation_status as software_installation_status_id, 
         o.hardware_installation_status as hardware_installation_status_id, 
         h_s.status as hardware_installation_status, 
         s_s.status as software_installation_status, 
@@ -64,16 +64,16 @@ const fetchOrders: () => Promise<Array<Order> | undefined> = async () => {
         o.hardware_installation_expected_date, 
         o.software_installation_expected_date 
         FROM orders as o 
-        JOIN statuses as s_s 
+        LEFT JOIN statuses as s_s 
         ON o.software_installation_status=s_s.id
-        JOIN statuses as h_s 
+        LEFT JOIN statuses as h_s 
         ON o.hardware_installation_status=h_s.id
         WHERE o.id=@order_id;
         `);
     } else if (poTypeId == 2) {
       response_2 = await pool.request().input("order_id", elementId).query(`
     SELECT o.total_services FROM orders as o WHERE o.id=@order_id;
-        `);
+    `);
     }
     const data_2 = response_2.recordset[0];
     if (!data_2) {
@@ -105,11 +105,11 @@ const fetchOrder: (id: number) => Promise<Order | undefined> = async (
         s.status, 
         o.created_at 
         FROM orders as o 
-        JOIN statuses as s 
+        LEFT JOIN statuses as s 
         ON o.status=s.id
-        JOIN parties as p
+        LEFT JOIN parties as p
         ON o.party_id=p.id     
-        JOIN po_types as pt
+        LEFT JOIN po_types as pt
         ON o.po_type_id=pt.id   
         WHERE o.id=@order_id;
         `);
@@ -131,9 +131,9 @@ const fetchOrder: (id: number) => Promise<Order | undefined> = async (
         o.hardware_installation_expected_date, 
         o.software_installation_expected_date 
         FROM orders as o 
-        JOIN statuses as s_s 
+        LEFT JOIN statuses as s_s 
         ON o.software_installation_status=s_s.id
-        JOIN statuses as h_s 
+        LEFT JOIN statuses as h_s 
         ON o.hardware_installation_status=h_s.id
         WHERE o.id=@order_id;
         `);
@@ -146,10 +146,14 @@ const fetchOrder: (id: number) => Promise<Order | undefined> = async (
   if (!data_2) {
     return undefined;
   }
-  data_2["materials"] = await fetchOrderMaterials(data_1["id"]);
+  if (po_type_id == 1) {
+    data_2["materials"] = await fetchOrderMaterials(data_1["id"]);
+  } else if (po_type_id == 2) {
+    data_2["services"] = await fetchOrderServices(data_1["id"]);
+  }
   data_2["payment_tcs"] = await fetchOrderPaymentTCs(data_1["id"]);
-  data_2["services"] = await fetchOrderServices(data_1["id"]);
-  return { ...data_1, ...data_2 };
+  const data = { ...data_1, ...data_2 };
+  return data;
 };
 
 const removeOrder: (id: number) => Promise<boolean> = async (id: number) => {
@@ -172,68 +176,120 @@ const insertOrder: (details: NewOrder) => Promise<Order | undefined> = async (
     hardware_installation_expected_date,
     software_installation_expected_date,
     hardware_installation_date,
-    hardware_installation_status_id,
+    hardware_installation_status_id: hardware_installation_status,
     software_installation_date,
-    software_installation_status_id,
-    status_id,
+    software_installation_status_id: software_installation_status,
+    status_id: status,
     party_id,
     payment_tcs,
     materials,
     services,
   } = details;
-  let orderResponse: { recordset: Array<any> } = { recordset: [] };
+
+  const fields = {
+    po_date,
+    po_number,
+    po_type_id,
+    status,
+    party_id,
+  };
+
+  const installationFields = {
+    hardware_installation_expected_date,
+    hardware_installation_date,
+    hardware_installation_status,
+    software_installation_expected_date,
+    software_installation_date,
+    software_installation_status,
+  };
+
+  const serviceFields = {
+    total_services,
+  };
+
+  const request = pool.request();
+  const updatedFields: string[] = [];
+
+  Object.entries(fields).forEach(([key, value]) => {
+    if (
+      key == "party_id" ||
+      (value !== undefined && value !== null && value !== "")
+    ) {
+      request.input(key, value);
+      updatedFields.push(key);
+    }
+  });
+
+  // let orderResponse: { recordset: Array<any> } = { recordset: [] };
   if (po_type_id == 1) {
-    orderResponse = await pool
-      .request()
-      .input("po_date", po_date)
-      .input("po_number", po_number)
-      .input("po_type_id", po_type_id)
-      .input("status", status_id)
-      .input("party_id", party_id)
-      .input(
-        "hardware_installation_expected_date",
-        hardware_installation_expected_date,
-      )
-      .input(
-        "software_installation_expected_date",
-        software_installation_expected_date,
-      )
-      .input("hardware_installation_date", hardware_installation_date)
-      .input("hardware_installation_status", hardware_installation_status_id)
-      .input("software_installation_date", software_installation_date)
-      .input("software_installation_status", software_installation_status_id)
-      .query(
-        `INSERT INTO orders 
-      (
-        po_date, hardware_installation_date, hardware_installation_status, 
-        software_installation_date, software_installation_status, status, party_id,
-        po_number, po_type_id,
-        hardware_installation_expected_date, software_installation_expected_date
-        ) 
-      OUTPUT INSERTED.id
-      VALUES (
-        @po_date, @hardware_installation_date, @hardware_installation_status, 
-        @software_installation_date, @software_installation_status, @status, @party_id,
-        @po_number, @po_type_id, 
-        @hardware_installation_expected_date, @software_installation_expected_date
-      )`,
-      );
+    Object.entries(installationFields).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        request.input(key, value);
+        updatedFields.push(key);
+      }
+    });
+    // orderResponse = await pool
+    //   .request()
+    //   .input("po_date", po_date)
+    //   .input("po_number", po_number)
+    //   .input("po_type_id", po_type_id)
+    //   .input("status", status_id)
+    //   .input("party_id", party_id)
+    //   .input(
+    //     "hardware_installation_expected_date",
+    //     hardware_installation_expected_date,
+    //   )
+    //   .input(
+    //     "software_installation_expected_date",
+    //     software_installation_expected_date,
+    //   )
+    //   .input("hardware_installation_date", hardware_installation_date)
+    //   .input("hardware_installation_status", hardware_installation_status_id)
+    //   .input("software_installation_date", software_installation_date)
+    //   .input("software_installation_status", software_installation_status_id)
+    //   .query(
+    //     `INSERT INTO orders
+    //   (
+    //     po_date, hardware_installation_date, hardware_installation_status,
+    //     software_installation_date, software_installation_status, status, party_id,
+    //     po_number, po_type_id,
+    //     hardware_installation_expected_date, software_installation_expected_date
+    //     )
+    //   OUTPUT INSERTED.id
+    //   VALUES (
+    //     @po_date, @hardware_installation_date, @hardware_installation_status,
+    //     @software_installation_date, @software_installation_status, @status, @party_id,
+    //     @po_number, @po_type_id,
+    //     @hardware_installation_expected_date, @software_installation_expected_date
+    //   )`,
+    //   );
   } else if (po_type_id == 2) {
-    orderResponse = await pool
-      .request()
-      .input("po_date", po_date)
-      .input("po_number", po_number)
-      .input("po_type_id", po_type_id)
-      .input("total_services", total_services)
-      .input("status", status_id)
-      .input("party_id", party_id)
-      .query(
-        `INSERT INTO orders 
-      ( po_date, status, party_id, po_number, po_type_id, total_services ) 
-      OUTPUT INSERTED.id
-      VALUES ( @po_date, @status, @party_id, @po_number, @po_type_id, @total_services )`,
-      );
+    Object.entries(serviceFields).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        request.input(key, value);
+        updatedFields.push(key);
+      }
+    });
+
+    // orderResponse = await pool
+    //   .request()
+    //   .input("po_date", po_date)
+    //   .input("po_number", po_number)
+    //   .input("po_type_id", po_type_id)
+    //   .input("total_services", total_services)
+    //   .input("status", status_id)
+    //   .input("party_id", party_id)
+    //   .query(
+    //     `INSERT INTO orders
+    //   ( po_date, status, party_id, po_number, po_type_id, total_services )
+    //   OUTPUT INSERTED.id
+    //   VALUES ( @po_date, @status, @party_id, @po_number, @po_type_id, @total_services )`,
+    //   );
   }
+
+  const orderResponse = await request.query(
+    `INSERT INTO orders ( ${updatedFields.join(", ")} ) OUTPUT INSERTED.id VALUES ( @${updatedFields.join(", @")} )`,
+  );
   const { recordset } = orderResponse;
   if (!recordset[0]) {
     return undefined;
@@ -272,64 +328,115 @@ const putOrder: (
     total_services,
     hardware_installation_expected_date,
     hardware_installation_date,
-    hardware_installation_status_id,
+    hardware_installation_status_id: hardware_installation_status,
     software_installation_expected_date,
     software_installation_date,
-    software_installation_status_id,
-    status_id,
+    software_installation_status_id: software_installation_status,
+    status_id: status,
     party_id,
   } = details;
 
-  let response: { rowsAffected: number[] } = { rowsAffected: [] };
+  const request = pool.request();
+  request.input("order_id", order_id);
+
+  const fields = {
+    po_date,
+    po_number,
+    po_type_id,
+    status,
+    party_id,
+  };
+
+  const installationFields = {
+    hardware_installation_expected_date,
+    hardware_installation_date,
+    hardware_installation_status,
+    software_installation_expected_date,
+    software_installation_date,
+    software_installation_status,
+  };
+
+  const serviceFields = {
+    total_services,
+  };
+
+  const updatedFields: string[] = [];
+
+  Object.entries(fields).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      request.input(key, value);
+      updatedFields.push(`${key}=@${key}`);
+    }
+  });
 
   if (po_type_id == 1) {
-    response = await pool
-      .request()
-      .input("order_id", order_id)
-      .input("po_number", po_number)
-      .input("po_type_id", po_type_id)
-      .input("po_date", po_date)
-      .input("status", status_id)
-      .input("party_id", party_id)
-      .input(
-        "hardware_installation_expected_date",
-        hardware_installation_expected_date,
-      )
-      .input(
-        "software_installation_expected_date",
-        software_installation_expected_date,
-      )
-      .input("hardware_installation_date", hardware_installation_date)
-      .input("hardware_installation_status", hardware_installation_status_id)
-      .input("software_installation_date", software_installation_date)
-      .input("software_installation_status", software_installation_status_id)
-      .query(
-        `UPDATE orders SET po_date=@po_date, status=@status, party_id=@party_id, po_number=@po_number, 
-        po_type_id=@po_type_id, 
-        hardware_installation_date=@hardware_installation_date, 
-        hardware_installation_status=@hardware_installation_status, 
-        software_installation_date=@software_installation_date, 
-        software_installation_status=@software_installation_status, 
-        hardware_installation_expected_date=@hardware_installation_expected_date,
-        software_installation_expected_date=@software_installation_expected_date 
-        WHERE id=@order_id`,
-      );
-  } else {
-    response = await pool
-      .request()
-      .input("order_id", order_id)
-      .input("po_number", po_number)
-      .input("po_type_id", po_type_id)
-      .input("po_date", po_date)
-      .input("status", status_id)
-      .input("party_id", party_id)
-      .input("total_services", total_services)
-      .query(
-        `UPDATE orders SET po_date=@po_date, status=@status, party_id=@party_id, po_number=@po_number,
-         po_type_id=@po_type_id, total_services=@total_services
-        WHERE id=@order_id`,
-      );
+    // response = await pool
+    //   .request()
+    //   .input("order_id", order_id)
+    //   .input("po_number", po_number)
+    //   .input("po_type_id", po_type_id)
+    //   .input("po_date", po_date)
+    //   .input("status", status_id)
+    //   .input("party_id", party_id)
+    //   .input(
+    //     "hardware_installation_expected_date",
+    //     hardware_installation_expected_date,
+    //   )
+    //   .input(
+    //     "software_installation_expected_date",
+    //     software_installation_expected_date,
+    //   )
+    //   .input("hardware_installation_date", hardware_installation_date)
+    //   .input("hardware_installation_status", hardware_installation_status_id)
+    //   .input("software_installation_date", software_installation_date)
+    //   .input("software_installation_status", software_installation_status_id)
+    //   .query(
+    //     `UPDATE orders SET po_date=@po_date, status=@status, party_id=@party_id, po_number=@po_number,
+    //     po_type_id=@po_type_id,
+    //     hardware_installation_date=@hardware_installation_date,
+    //     hardware_installation_status=@hardware_installation_status,
+    //     software_installation_date=@software_installation_date,
+    //     software_installation_status=@software_installation_status,
+    //     hardware_installation_expected_date=@hardware_installation_expected_date,
+    //     software_installation_expected_date=@software_installation_expected_date
+    //     WHERE id=@order_id`,
+    //   );
+
+    Object.entries(installationFields).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        request.input(key, value);
+        updatedFields.push(`${key}=@${key}`);
+      }
+    });
+  } else if (po_type_id == 2) {
+    Object.entries(serviceFields).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        request.input(key, value);
+        updatedFields.push(`${key}=@${key}`);
+      }
+    });
+    // response = await pool
+    //   .request()
+    //   .input("order_id", order_id)
+    //   .input("po_number", po_number)
+    //   .input("po_type_id", po_type_id)
+    //   .input("po_date", po_date)
+    //   .input("status", status_id)
+    //   .input("party_id", party_id)
+    //   .input("total_services", total_services)
+    //   .query(
+    //     `UPDATE orders SET po_date=@po_date, status=@status, party_id=@party_id, po_number=@po_number,
+    //      po_type_id=@po_type_id, total_services=@total_services
+    //     WHERE id=@order_id`,
+    //   );
   }
+  if (updatedFields.length == 0) {
+    return false;
+  }
+
+  const response = await request.query(
+    `UPDATE orders SET ${updatedFields.join(", ")} WHERE id=@order_id`,
+  );
   const { rowsAffected } = response;
   return rowsAffected[0]! > 0;
 };

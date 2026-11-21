@@ -72,18 +72,38 @@ const minimumDates: Record<string, { date: string }> = {
 };
 
 const overviewKeys: Array<FieldKey> = [
-  { name: "PO Number", key: "po_number", type: "text", required: true },
+  {
+    name: "PO Number",
+    key: "po_number",
+    type: "text",
+    // , required: true
+  },
   { name: "PO Date", key: "po_date", type: "date", required: true },
-  { name: "PO Type", key: "po_type", type: "select", required: true },
-  { name: "Party", key: "party", type: "select", required: true },
-  { name: "Status", key: "status", type: "select", required: true },
+  {
+    name: "PO Type",
+    key: "po_type",
+    type: "select",
+    // , required: true
+  },
+  {
+    name: "Party",
+    key: "party",
+    type: "select",
+    // , required: true
+  },
+  {
+    name: "Status",
+    key: "status",
+    type: "select",
+    // , required: true
+  },
 ];
 
 const serviceKey: FieldKey = {
   name: "Total Services",
   key: "total_services",
   type: "number",
-  required: true,
+  // required: true,
 };
 
 const hardwareKeys: Array<FieldKey> = [
@@ -96,13 +116,13 @@ const hardwareKeys: Array<FieldKey> = [
     name: "Expected Installation Date",
     key: "hardware_installation_expected_date",
     type: "date",
-    required: true,
+    // required: true,
   },
   {
     name: "Installation Status",
     key: "hardware_installation_status",
     type: "select",
-    required: true,
+    // required: true,
   },
 ];
 
@@ -116,13 +136,13 @@ const softwareKeys: Array<FieldKey> = [
     name: "Expected Installation Date",
     key: "software_installation_expected_date",
     type: "date",
-    required: true,
+    // required: true,
   },
   {
     name: "Installation Status",
     key: "software_installation_status",
     type: "select",
-    required: true,
+    // required: true,
   },
 ];
 
@@ -366,16 +386,16 @@ export default function Order() {
         return;
       }
 
-      let requiredFields: Array<FieldKey> = [
-        { name: "PO Number", key: "po_number", type: "text", required: true },
-        { name: "PO Date", key: "po_date", type: "date", required: true },
-        { name: "PO Type", key: "po_type_id", type: "number", required: true },
-        { name: "Party", key: "party_id", type: "number", required: true },
-        { name: "Status", key: "status_id", type: "number", required: true },
-      ];
+      let orderFields: Array<FieldKey> = [];
+      orderFields = overviewKeys.map((oF) => {
+        if (["po_type", "party", "status"].includes(oF.key)) {
+          return { ...oF, key: oF.key + "_id", type: "number" };
+        }
+        return oF;
+      });
       if (order.po_type_id == 1) {
-        requiredFields = [
-          ...requiredFields,
+        orderFields = [
+          ...orderFields,
           ...hardwareKeys,
           {
             name: "Hardware Installation Status ID",
@@ -392,7 +412,7 @@ export default function Order() {
           },
         ];
       } else if (order.po_type_id == 2) {
-        requiredFields = [...requiredFields, serviceKey];
+        orderFields = [...orderFields, serviceKey];
       } else {
         setFieldError(true);
         return;
@@ -440,10 +460,15 @@ export default function Order() {
 
       const updatedOrderDetails = {};
 
-      requiredFields.forEach((reqField) => {
+      orderFields.forEach((reqField) => {
         const { key, type } = reqField;
         const value = order[key];
-        updatedOrderDetails[key] = type == "number" ? Number(value) : value;
+        if (value != null && value != undefined) {
+          if (type == "number" || (typeof value == "string" && value != "")) {
+            updatedOrderDetails[key] = type == "number" ? Number(value) : value;
+          }
+        }
+        // updatedOrderDetails[key] = type == "number" ? Number(value) : value;
       });
 
       dispatch(
@@ -494,54 +519,58 @@ export default function Order() {
       return;
     }
     setFieldError(false);
-
-    let requiredFields: Array<FieldKey> = [
-      { name: "PO Number", key: "po_number", type: "text", required: true },
-      { name: "PO Date", key: "po_date", type: "date", required: true },
-      { name: "PO Type", key: "po_type_id", type: "number", required: true },
-      { name: "Party", key: "party_id", type: "number", required: true },
-      { name: "Status", key: "status_id", type: "number", required: true },
-    ];
-    if (order.po_type_id == 1) {
-      requiredFields = [
-        ...requiredFields,
-        ...hardwareKeys,
-        {
-          name: "Hardware Installation Status ID",
-          key: "hardware_installation_status_id",
-          type: "number",
-          required: true,
-        },
-        ...softwareKeys,
-        {
-          name: "Software Installation Status ID",
-          key: "software_installation_status_id",
-          type: "number",
-          required: true,
-        },
-      ];
-    } else if (order.po_type_id == 2) {
-      requiredFields = [...requiredFields, serviceKey];
-    } else {
+    if (!order["po_date"]) {
       setFieldError(true);
       return;
     }
 
-    let orderFieldError = false;
+    // let requiredFields: Array<FieldKey> = [
+    //   { name: "PO Number", key: "po_number", type: "text", required: true },
+    //   { name: "PO Date", key: "po_date", type: "date", required: true },
+    //   { name: "PO Type", key: "po_type_id", type: "number", required: true },
+    //   { name: "Party", key: "party_id", type: "number", required: true },
+    //   { name: "Status", key: "status_id", type: "number", required: true },
+    // ];
+    // if (order.po_type_id == 1) {
+    //   requiredFields = [
+    //     ...requiredFields,
+    //     ...hardwareKeys,
+    //     {
+    //       name: "Hardware Installation Status ID",
+    //       key: "hardware_installation_status_id",
+    //       type: "number",
+    //       required: true,
+    //     },
+    //     ...softwareKeys,
+    //     {
+    //       name: "Software Installation Status ID",
+    //       key: "software_installation_status_id",
+    //       type: "number",
+    //       required: true,
+    //     },
+    //   ];
+    // } else if (order.po_type_id == 2) {
+    //   requiredFields = [...requiredFields, serviceKey];
+    // } else {
+    //   setFieldError(true);
+    //   return;
+    // }
 
-    for (const reqField of requiredFields) {
-      if (!order[reqField.key] && (reqField.required ?? false)) {
-        setFieldError(true);
-        orderFieldError = true;
-        break;
-      }
-    }
+    // let orderFieldError = false;
 
-    if (orderFieldError) {
-      return;
-    } else {
-      setFieldError(false);
-    }
+    // for (const reqField of requiredFields) {
+    //   if (!order[reqField.key] && (reqField.required ?? false)) {
+    //     setFieldError(true);
+    //     orderFieldError = true;
+    //     break;
+    //   }
+    // }
+
+    // if (orderFieldError) {
+    //   return;
+    // } else {
+    //   setFieldError(false);
+    // }
 
     const order_po_date = order?.po_date;
     const order_po_type: number = order?.po_type_id

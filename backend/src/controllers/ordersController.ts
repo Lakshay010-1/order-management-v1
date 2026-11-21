@@ -42,11 +42,11 @@ const getOrder = async (req: Request, res: Response) => {
 
 const addOrder = async (req: Request, res: Response) => {
   const bodySchema1 = z.object({
-    po_date: z.coerce.date(),
-    po_number: z.string(),
-    po_type_id: z.number(),
-    status_id: z.number(),
-    party_id: z.number(),
+    po_date: z.coerce.date().optional(),
+    po_number: z.string().optional(),
+    po_type_id: z.number().optional(),
+    status_id: z.number().optional(),
+    party_id: z.number().optional(),
     payment_tcs: z.array(
       z.object({
         term: z.string(),
@@ -59,18 +59,18 @@ const addOrder = async (req: Request, res: Response) => {
     return apiResponse(res, 400, "Invalid request parameters");
   }
   const bodySchema_service = z.object({
-    total_services: z.number(),
+    total_services: z.number().optional(),
     services: z.array(
       z.object({ description: z.string(), date: z.coerce.date() }),
     ),
   });
   const bodySchema_installation = z.object({
     hardware_installation_date: z.coerce.date().optional(),
-    hardware_installation_expected_date: z.coerce.date(),
-    hardware_installation_status_id: z.number(),
+    hardware_installation_expected_date: z.coerce.date().optional(),
+    hardware_installation_status_id: z.number().optional(),
     software_installation_date: z.coerce.date().optional(),
-    software_installation_expected_date: z.coerce.date(),
-    software_installation_status_id: z.number(),
+    software_installation_expected_date: z.coerce.date().optional(),
+    software_installation_status_id: z.number().optional(),
     materials: z.array(
       z.object({
         item_id: z.number(),
@@ -106,27 +106,27 @@ const addOrder = async (req: Request, res: Response) => {
 
 const updateOrder = async (req: Request, res: Response) => {
   const bodySchema1 = z.object({
-    po_number: z.string(),
-    po_date: z.coerce.date(),
-    po_type_id: z.number(),
-    party_id: z.number(),
-    status_id: z.number(),
+    po_number: z.string().optional(),
+    po_date: z.coerce.date().optional(),
+    po_type_id: z.number().optional(),
+    party_id: z.number().optional(),
+    status_id: z.number().optional(),
   });
   const validParmas_overview = bodySchema1.safeParse(req.body);
   if (!validParmas_overview.success) {
     return apiResponse(res, 400, "Invalid request parameters");
   }
   const bodySchema_service = z.object({
-    total_services: z.number(),
+    total_services: z.number().optional(),
   });
 
   const bodySchema_installation = z.object({
     hardware_installation_date: z.coerce.date().optional(),
-    hardware_installation_expected_date: z.coerce.date(),
-    hardware_installation_status_id: z.number(),
+    hardware_installation_expected_date: z.coerce.date().optional(),
+    hardware_installation_status_id: z.number().optional(),
     software_installation_date: z.coerce.date().optional(),
-    software_installation_expected_date: z.coerce.date(),
-    software_installation_status_id: z.number(),
+    software_installation_expected_date: z.coerce.date().optional(),
+    software_installation_status_id: z.number().optional(),
   });
   const po_type_id = Number(req.body.po_type_id);
   const paramsValid_installation = bodySchema_installation.safeParse(req.body);

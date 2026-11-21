@@ -15,7 +15,7 @@ import styles from "./styles/Parties.module.css";
 
 export default function Parties() {
   const fields: (keyof Party)[] = [
-    "id",
+    // "id",
     "party",
     "contact_person",
     "contact_num",

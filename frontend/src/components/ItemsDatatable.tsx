@@ -145,6 +145,7 @@ export default function BasicTable<T>({
         <Table sx={{ minWidth: 650 }} aria-label="items table">
           <TableHead style={{ backgroundColor: "#d0d8e1" }}>
             <TableRow>
+              <TableCell align="center">S.No.</TableCell>
               {fields.map((field) => (
                 <TableCell align="center" key={field}>
                   {field}
@@ -172,6 +173,7 @@ export default function BasicTable<T>({
           <TableBody>
             {addRow && (
               <TableRow>
+                <TableCell />
                 {fields.map((field) => {
                   return (
                     <TableCell
@@ -234,82 +236,93 @@ export default function BasicTable<T>({
               </TableRow>
             )}
 
-            {data.map((dataUnit) => {
-              const isEditing = updateRow === dataUnit.id;
+            {data
+              .toSorted((a, b) => {
+                const aTime = new Date(a.created_at).getTime(),
+                  bTime = new Date(b.created_at).getTime();
+                return bTime - aTime;
+              })
+              .map((dataUnit, dataUnitIdx) => {
+                const isEditing = updateRow === dataUnit.id;
 
-              return (
-                <TableRow key={dataUnit.id}>
-                  {fields.map((field) => (
-                    <TableCell
-                      key={field}
-                      align="center"
-                      style={{ padding: 0 }}
-                    >
-                      <input
-                        disabled={
-                          !isEditing || field === "id" || field === "created_at"
-                        }
-                        className={
-                          isEditing && field !== "id" ? styles.editData : ""
-                        }
-                        name={field}
-                        value={getInputValue(
-                          isEditing ? tempDataUnit : dataUnit,
-                          field,
-                        )}
-                        onChange={(e) =>
-                          handleFieldChange(field, e.target.value)
-                        }
-                      />
+                return (
+                  <TableRow key={dataUnit.id}>
+                    <TableCell align="center" style={{ padding: 0 }}>
+                      {dataUnitIdx + 1}
                     </TableCell>
-                  ))}
+                    {fields.map((field) => (
+                      <TableCell
+                        key={field}
+                        align="center"
+                        style={{ padding: 0 }}
+                      >
+                        <input
+                          disabled={
+                            !isEditing ||
+                            field === "id" ||
+                            field === "created_at"
+                          }
+                          className={
+                            isEditing && field !== "id" ? styles.editData : ""
+                          }
+                          name={field}
+                          value={getInputValue(
+                            isEditing ? tempDataUnit : dataUnit,
+                            field,
+                          )}
+                          onChange={(e) =>
+                            handleFieldChange(field, e.target.value)
+                          }
+                        />
+                      </TableCell>
+                    ))}
 
-                  <TableCell>
-                    <div className={styles.actionBtnContainer}>
-                      {isEditing ? (
-                        <button
-                          type="button"
-                          className={`${styles.actionBtn} ${styles.blue}`}
-                          onClick={handleEdit}
-                          aria-label="Save changes"
-                        >
-                          <DoneIcon className={styles.blackColor} />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={`${styles.actionBtn} ${styles.gold}`}
-                          onClick={() => handleEditMode(dataUnit)}
-                          aria-label="Edit row"
-                        >
-                          <EditIcon className={styles.whiteColor} />
-                        </button>
-                      )}
+                    <TableCell>
+                      <div className={styles.actionBtnContainer}>
+                        {isEditing ? (
+                          <button
+                            type="button"
+                            className={`${styles.actionBtn} ${styles.blue}`}
+                            onClick={handleEdit}
+                            aria-label="Save changes"
+                          >
+                            <DoneIcon className={styles.blackColor} />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className={`${styles.actionBtn} ${styles.gold}`}
+                            onClick={() => handleEditMode(dataUnit)}
+                            aria-label="Edit row"
+                          >
+                            <EditIcon className={styles.whiteColor} />
+                          </button>
+                        )}
 
-                      {isEditing ? (
-                        <button
-                          type="button"
-                          className={`${styles.actionBtn} ${styles.black}`}
-                          onClick={handleEditCancel}
-                          aria-label="Cancel editing"
-                        >
-                          <CancelIcon className={styles.redColor} />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={`${styles.actionBtn} ${styles.red}`}
-                          onClick={() => handleDelete(dataUnit.id)}
-                          aria-label="Delete row"
-                        >
-                          <DeleteIcon className={styles.whiteColor} />
-                        </button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                        {isEditing ? (
+                          <button
+                            type="button"
+                            className={`${styles.actionBtn} ${styles.black}`}
+                            onClick={handleEditCancel}
+                            aria-label="Cancel editing"
+                          >
+                            <CancelIcon className={styles.redColor} />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className={`${styles.actionBtn} ${styles.red}`}
+                            onClick={() => handleDelete(dataUnit.id)}
+                            aria-label="Delete row"
+                          >
+                            <DeleteIcon className={styles.whiteColor} />
+                          </button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </TableContainer>

@@ -13,7 +13,11 @@ import { setHeaderContent } from "../store/slices/headerSlice";
 import AlertDialog from "../components/AlertDialog.tsx";
 
 export default function Items() {
-  const fields = ["id", "item", "created_at"];
+  const fields = [
+    // "id",
+    "item",
+    // "created_at",
+  ];
   const [itemsMsg, setItemsMsg] = useState("");
   const [orderDeleteId, setOrderDeleteId] = React.useState(-1);
   const [openDialog, setOpenDialog] = React.useState(false);

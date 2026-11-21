@@ -147,11 +147,36 @@ export default function OrderForm() {
   >([]);
 
   const overviewKeys = [
-    { name: "PO Number", type: "text", key: "po_number", required: true },
-    { name: "PO Date", type: "date", key: "po_date", required: true },
-    { name: "PO Type", type: "select", key: "po_type", required: true },
-    { name: "Party", type: "select", key: "party", required: true },
-    { name: "Status", type: "select", key: "status", required: true },
+    {
+      name: "PO Number",
+      type: "text",
+      key: "po_number",
+      // , required: true
+    },
+    {
+      name: "PO Date",
+      type: "date",
+      key: "po_date",
+      required: true,
+    },
+    {
+      name: "PO Type",
+      type: "select",
+      key: "po_type",
+      // , required: true
+    },
+    {
+      name: "Party",
+      type: "select",
+      key: "party",
+      // , required: true
+    },
+    {
+      name: "Status",
+      type: "select",
+      key: "status",
+      // , required: true
+    },
   ];
 
   const servicesKeys = [
@@ -195,7 +220,7 @@ export default function OrderForm() {
       name: "Expected Installation Date",
       type: "date",
       key: "hardware_installation_expected_date",
-      required: true,
+      // required: true,
     },
     {
       name: "Installation Date",
@@ -206,7 +231,7 @@ export default function OrderForm() {
       name: "Installation Status",
       type: "select",
       key: "hardware_installation_status_id",
-      required: true,
+      // required: true,
     },
   ];
 
@@ -215,7 +240,7 @@ export default function OrderForm() {
       name: "Expected Installation Date",
       type: "date",
       key: "software_installation_expected_date",
-      required: true,
+      // required: true,
     },
     {
       name: "Installation Date",
@@ -226,7 +251,7 @@ export default function OrderForm() {
       name: "Installation Status",
       type: "select",
       key: "software_installation_status_id",
-      required: true,
+      // required: true,
     },
   ];
 
@@ -284,6 +309,12 @@ export default function OrderForm() {
         software_installation_expected_date,
         software_installation_status_id,
       } = newOrder;
+
+      if (!po_date) {
+        setFieldError(true);
+        return;
+      }
+
       const newOdr_a = {
         po_date: formatDate(po_date),
         po_number,
@@ -326,40 +357,53 @@ export default function OrderForm() {
         total_services: Number(total_services),
       };
       const newOdr = {
+        party: party_id,
+      };
+
+      const tempOdr = {
         ...newOdr_a,
         ...(po_type_id == 1 ? newOdr_b : newOdr_c),
       };
-
-      let missingRequiredFields = false;
-      let requiredFields = [...overviewKeys];
-
-      if (po_type_id == 1) {
-        requiredFields = [
-          ...requiredFields,
-          ...hardwareInstallationKeys,
-          ...softwareInstallationKeys,
-        ];
-      } else {
-        requiredFields = [
-          ...requiredFields,
-          { key: "total_services", required: true },
-        ];
-      }
-
-      newOdr["status"] = status_id;
-      newOdr["party"] = party_id;
-      newOdr["po_type"] = po_type_id;
-
-      requiredFields.forEach((field) => {
-        missingRequiredFields =
-          missingRequiredFields ||
-          ((field.required ?? false) && !newOdr[field.key]);
+      Object.entries(tempOdr).forEach(([fieldKey, fieldValue]) => {
+        if (fieldValue != null && fieldValue != undefined) {
+          if (
+            (typeof fieldValue == "string" && fieldValue !== "") ||
+            typeof fieldValue != "string"
+          ) {
+            newOdr[fieldKey] = fieldValue;
+          }
+        }
       });
 
-      if (missingRequiredFields) {
-        setFieldError(true);
-        return;
-      }
+      // let missingRequiredFields = false;
+      // let requiredFields = [...overviewKeys];
+
+      // if (po_type_id == 1) {
+      //   requiredFields = [
+      //     ...requiredFields,
+      //     ...hardwareInstallationKeys,
+      //     ...softwareInstallationKeys,
+      //   ];
+      // } else {
+      //   requiredFields = [
+      //     ...requiredFields,
+      //     { key: "total_services", required: true },
+      //   ];
+      // }
+
+      // newOdr["status"] = status_id;
+      // newOdr["po_type"] = po_type_id;
+
+      // requiredFields.forEach((field) => {
+      //   missingRequiredFields =
+      //     missingRequiredFields ||
+      //     ((field.required ?? false) && !newOdr[field.key]);
+      // });
+
+      // if (missingRequiredFields) {
+      //   setFieldError(true);
+      //   return;
+      // }
 
       const new_order_po_date = newOdr.po_date;
       if (po_type_id == 1) {
