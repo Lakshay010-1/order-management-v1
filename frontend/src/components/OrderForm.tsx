@@ -43,6 +43,7 @@ const newOrderInitialState = {
   status_id: "",
   party_id: "",
   total_services: "",
+  completion_date: "",
   hardware_installation_date: "",
   software_installation_date: "",
   hardware_installation_expected_date: "",
@@ -177,6 +178,12 @@ export default function OrderForm() {
       key: "status",
       // , required: true
     },
+    {
+      name: "Completion Date",
+      type: "date",
+      key: "completion_date",
+      // , required: true
+    },
   ];
 
   const servicesKeys = [
@@ -302,6 +309,7 @@ export default function OrderForm() {
         status_id,
         party_id,
         total_services,
+        completion_date,
         hardware_installation_date,
         hardware_installation_expected_date,
         hardware_installation_status_id,
@@ -317,6 +325,7 @@ export default function OrderForm() {
 
       const newOdr_a = {
         po_date: formatDate(po_date),
+        completion_date: formatDate(completion_date),
         po_number,
         po_type_id,
         status_id,

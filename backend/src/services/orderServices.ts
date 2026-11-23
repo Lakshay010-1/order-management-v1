@@ -32,6 +32,7 @@ const fetchOrders: () => Promise<Array<Order> | undefined> = async () => {
         pt.type as po_type,
         o.po_type_id,
         o.party_id,
+        o.completion_date, 
         p.party as party,
         o.status as status_id,
         s.status, 
@@ -100,6 +101,7 @@ const fetchOrder: (id: number) => Promise<Order | undefined> = async (
         pt.type as po_type,
         o.po_type_id,
         o.party_id,
+        o.completion_date,
         p.party as party,
         o.status as status_id,
         s.status, 
@@ -172,6 +174,7 @@ const insertOrder: (details: NewOrder) => Promise<Order | undefined> = async (
     po_date,
     po_number,
     po_type_id,
+    completion_date,
     total_services,
     hardware_installation_expected_date,
     software_installation_expected_date,
@@ -192,6 +195,7 @@ const insertOrder: (details: NewOrder) => Promise<Order | undefined> = async (
     po_type_id,
     status,
     party_id,
+    completion_date,
   };
 
   const installationFields = {
@@ -325,6 +329,7 @@ const putOrder: (
     po_date,
     po_number,
     po_type_id,
+    completion_date,
     total_services,
     hardware_installation_expected_date,
     hardware_installation_date,
@@ -345,6 +350,7 @@ const putOrder: (
     po_type_id,
     status,
     party_id,
+    completion_date,
   };
 
   const installationFields = {

@@ -47,6 +47,7 @@ const addOrder = async (req: Request, res: Response) => {
     po_type_id: z.number().optional(),
     status_id: z.number().optional(),
     party_id: z.number().optional(),
+    completion_date: z.coerce.date().optional(),
     payment_tcs: z.array(
       z.object({
         term: z.string(),
@@ -111,6 +112,7 @@ const updateOrder = async (req: Request, res: Response) => {
     po_type_id: z.number().optional(),
     party_id: z.number().optional(),
     status_id: z.number().optional(),
+    completion_date: z.coerce.date().optional(),
   });
   const validParmas_overview = bodySchema1.safeParse(req.body);
   if (!validParmas_overview.success) {

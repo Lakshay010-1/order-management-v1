@@ -54,6 +54,7 @@ const orderInitialState: Order_a = {
   status: "",
   party_id: -1,
   party: "",
+  completion_date: undefined,
   hardware_installation_date: "",
   hardware_installation_expected_date: "",
   hardware_installation_status: "",
@@ -95,6 +96,12 @@ const overviewKeys: Array<FieldKey> = [
     name: "Status",
     key: "status",
     type: "select",
+    // , required: true
+  },
+  {
+    name: "Completion Date",
+    key: "completion_date",
+    type: "date",
     // , required: true
   },
 ];
@@ -460,8 +467,8 @@ export default function Order() {
 
       const updatedOrderDetails = {};
 
-      orderFields.forEach((reqField) => {
-        const { key, type } = reqField;
+      orderFields.forEach((odrField) => {
+        const { key, type } = odrField;
         const value = order[key];
         if (value != null && value != undefined) {
           if (type == "number" || (typeof value == "string" && value != "")) {

@@ -8,6 +8,7 @@ export interface Order {
   po_date: Date;
   po_type: string;
   total_services: number;
+  completion_date: Date | undefined;
   hardware_installation_date: Date;
   hardware_installation_expected_date: Date;
   hardware_installation_status: string;
@@ -27,6 +28,7 @@ export interface NewOrder {
   po_date: Date;
   po_type_id: number;
   total_services: number | undefined;
+  completion_date: Date | undefined;
   hardware_installation_date: Date | undefined;
   hardware_installation_expected_date: Date;
   hardware_installation_status_id: number;
