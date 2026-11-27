@@ -400,6 +400,16 @@ export default function Order() {
         }
         return oF;
       });
+      orderFields.push({
+        name: "party",
+        key: "party",
+        type: "text",
+      });
+      orderFields.push({
+        name: "status",
+        key: "status",
+        type: "text",
+      });
       if (order.po_type_id == 1) {
         orderFields = [
           ...orderFields,

@@ -78,7 +78,7 @@ export default function OverviewGridData({
       return {
         ...prev,
         status_id: selectedStatus!.id,
-        status: selectedStatus!.party,
+        status: selectedStatus!.status,
       };
     });
   }
